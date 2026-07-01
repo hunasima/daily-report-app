@@ -18,6 +18,7 @@ export default function Home() {
       <input
         value={text}
         onChange={(e) => setText(e.target.value)}
+        placeholder="ここに入力"
       />
 
       <button onClick={add}>
