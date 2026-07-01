@@ -44,14 +44,19 @@ export default function Home() {
     <div style={{ padding: 20 }}>
       <h1>日報アプリ（クラウド版）</h1>
 
+      {/* 入力欄 */}
       <input
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="入力"
+        placeholder="ここに入力"
       />
 
-      <button onClick={add}>追加</button>
+      {/* 🔥 ここがボタン */}
+      <button onClick={add}>
+        追加
+      </button>
 
+      {/* 一覧 */}
       {list.map((item, i) => (
         <p key={i}>{item.content}</p>
       ))}
