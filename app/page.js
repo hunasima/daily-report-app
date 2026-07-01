@@ -1,10 +1,10 @@
+
 "use client";
 import { useState, useEffect } from "react";
 
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
+import { getFirestore, collection, addDoc, onSnapshot } from "firebase/firestore";
 
-// 🔥 Firebase設定
 const firebaseConfig = {
   apiKey: "AIzaSyAFGeQvwzKWiqbn1-X7uo6aTjW1KLGSvK0",
   authDomain: "daily-report-27522.firebaseapp.com",
@@ -14,7 +14,6 @@ const firebaseConfig = {
   appId: "1:962362045585:web:b8c6844939bfdd3b7b3b30"
 };
 
-// 初期化
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -22,18 +21,17 @@ export default function Home() {
   const [text, setText] = useState("");
   const [list, setList] = useState([]);
 
-  // ✅ データ読み込み
-  const fetchData = async () => {
-    const snapshot = await getDocs(collection(db, "reports"));
-    const data = snapshot.docs.map(doc => doc.data());
-    setList(data);
-  };
-
+  // ✅ リアルタイムでデータ取得
   useEffect(() => {
-    fetchData();
+    const unsubscribe = onSnapshot(collection(db, "reports"), (snapshot) => {
+      const data = snapshot.docs.map(doc => doc.data());
+      setList(data);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  // ✅ 追加
+  // ✅ 保存
   const add = async () => {
     if (!text) return;
 
@@ -42,7 +40,6 @@ export default function Home() {
     });
 
     setText("");
-    fetchData(); // 🔥 保存後に再取得
   };
 
   return (
@@ -55,9 +52,7 @@ export default function Home() {
         placeholder="ここに入力"
       />
 
-      <button onClick={add}>
-        追加
-      </button>
+      <button onClick={add}>追加</button>
 
       {list.map((item, i) => (
         <p key={i}>{item.content}</p>
