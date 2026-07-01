@@ -16,8 +16,7 @@ export default function Home() {
     setReports(JSON.parse(localStorage.getItem("reports") || "[]"));
   }, []);
 
-  const change = (k, v) => setForm({ ...form, [k]: v });
-
+const change = (k, v) => setForm((prev) => ({ ...prev, [k]: v })) as any;
   // 利用時間
   const calcTime = () => {
     if (!form.start || !form.end) return "";
