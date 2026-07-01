@@ -1,9 +1,13 @@
-
 "use client";
 import { useState, useEffect } from "react";
 
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, onSnapshot } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAFGeQvwzKWiqbn1-X7uo6aTjW1KLGSvK0",
@@ -18,45 +22,59 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 export default function Home() {
-  const [text, setText] = useState("");
+  const [form, setForm] = useState({});
   const [list, setList] = useState([]);
 
-  // ✅ リアルタイムでデータ取得
+  const change = (k, v) => {
+    setForm((prev) => ({ ...prev, [k]: v }));
+  };
+
+  // ✅ リアルタイム取得
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "reports"), (snapshot) => {
-      const data = snapshot.docs.map(doc => doc.data());
+    const unsub = onSnapshot(collection(db, "reports"), (snapshot) => {
+      const data = snapshot.docs.map((doc) => doc.data());
       setList(data);
     });
-
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
+
+  // ✅ 利用時間
+  const calcTime = () => {
+    if (!form.start || !form.end) return "";
+    const s = new Date(`2024-01-01T${form.start}`);
+    const e = new Date(`2024-01-01T${form.end}`);
+    const diff = (e - s) / 60000;
+    const h = Math.floor(diff / 60);
+    const m = diff % 60;
+    return `${h}時間${m}分`;
+  };
+
+  // ✅ 合計
+  const calcTotal = () => {
+    return (Number(form.cash) || 0) + (Number(form.receivable) || 0);
+  };
 
   // ✅ 保存
   const add = async () => {
-    if (!text) return;
-
     await addDoc(collection(db, "reports"), {
-      content: text
+      ...form,
+      duration: calcTime(),
+      total: calcTotal()
     });
 
-    setText("");
+    setForm({});
   };
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>日報アプリ（クラウド版）</h1>
+      <h2>日報アプリ（完全版）</h2>
 
-      <input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="ここに入力"
-      />
+      <input type="date" onChange={(e) => change("date", e.target.value)} />
+      <input placeholder="利用者名" onChange={(e) => change("name", e.target.value)} />
+      <input placeholder="迎先" onChange={(e) => change("place", e.target.value)} />
 
-      <button onClick={add}>追加</button>
+      <p>時間</p>
+      <input type="time" onChange={(e) => change("start", e.target.value)} />
+      <input type="time" onChange={(e) => change("end", e.target.value)} />
 
-      {list.map((item, i) => (
-        <p key={i}>{item.content}</p>
-      ))}
-    </div>
-  );
-}
+      <textarea placeholder="内容" onChange={(e) => change("content", e.target.value)} />
