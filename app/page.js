@@ -40,38 +40,94 @@ export default function Home() {
     return () => unsub();
   }, []);
 
+  // 利用時間
+  const calcTime = () => {
+    if (!form.start || !form.end) return "";
+    const s = new Date(`2024-01-01T${form.start}`);
+    const e = new Date(`2024-01-01T${form.end}`);
+    const diff = (e - s) / 60000;
+    return `${Math.floor(diff/60)}時間${diff%60}分`;
+  };
+
+  // 合計
+  const total =
+    (Number(form.cash)||0) +
+    (Number(form.receivable)||0);
+
   const save = async () => {
-    if (!form.name) return;
+    const data = {
+      ...form,
+      duration: calcTime(),
+      total
+    };
 
     if (editId) {
-      await updateDoc(doc(db, "reports", editId), form);
+      await updateDoc(doc(db,"reports",editId),data);
       setEditId(null);
     } else {
-      await addDoc(collection(db, "reports"), form);
+      await addDoc(collection(db,"reports"),data);
     }
+
     setForm({});
   };
 
-  const remove = async (id) => {
-    await deleteDoc(doc(db, "reports", id));
+  const remove = async(id)=>{
+    await deleteDoc(doc(db,"reports",id));
   };
 
-  const edit = (item) => {
+  const edit = (item)=>{
     setForm(item);
     setEditId(item.id);
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>日報アプリ（最終版）</h2>
+    <div style={{ padding:20 }}>
+      <h2>日報アプリ（業務完全版）</h2>
 
-      {/* 入力項目 */}
-      <input type="date" value={form.date || ""} onChange={(e) => change("date", e.target.value)} />
-      <input placeholder="利用者名" value={form.name || ""} onChange={(e) => change("name", e.target.value)} />
-      <input placeholder="迎先" value={form.place || ""} onChange={(e) => change("place", e.target.value)} />
+      <input type="date" value={form.date||""} onChange={(e)=>change("date",e.target.value)} />
+      <input placeholder="利用者名" value={form.name||""} onChange={(e)=>change("name",e.target.value)} />
+      <input placeholder="迎先" value={form.place||""} onChange={(e)=>change("place",e.target.value)} />
 
-      <input type="time" value={form.start || ""} onChange={(e) => change("start", e.target.value)} />
-      <input type="time" value={form.end || ""} onChange={(e) => change("end", e.target.value)} />
+      <input type="time" value={form.start||""} onChange={(e)=>change("start",e.target.value)} />
+      <input type="time" value={form.end||""} onChange={(e)=>change("end",e.target.value)} />
 
-      <textarea placeholder="内容" value={form.content || ""} onChange={(e) => change("content", e.target.value)} />
+      <textarea placeholder="内容" value={form.content||""} onChange={(e)=>change("content",e.target.value)} />
+      <textarea placeholder="備考" value={form.note||""} onChange={(e)=>change("note",e.target.value)} />
 
+      <input placeholder="担当者" value={form.staff||""} onChange={(e)=>change("staff",e.target.value)} />
+
+      <input placeholder="現金売上" value={form.cash||""} onChange={(e)=>change("cash",e.target.value)} />
+      <input placeholder="売掛" value={form.receivable||""} onChange={(e)=>change("receivable",e.target.value)} />
+      <input placeholder="立替（現金）" value={form.advance||""} onChange={(e)=>change("advance",e.target.value)} />
+      <input placeholder="有料道路" value={form.toll||""} onChange={(e)=>change("toll",e.target.value)} />
+      <input placeholder="現金使用" value={form.use||""} onChange={(e)=>change("use",e.target.value)} />
+      <input placeholder="交通費" value={form.transport||""} onChange={(e)=>change("transport",e.target.value)} />
+
+      <input placeholder="走行距離(Km)" value={form.distance||""} onChange={(e)=>change("distance",e.target.value)} />
+
+      <p>利用時間：{calcTime()}</p>
+      <p>売上合計：{total} 円</p>
+
+      <button onClick={save}>
+        {editId ? "更新" : "保存"}
+      </button>
+
+      <hr/>
+
+      {list.map((r)=>(
+        <div key={r.id} style={{border:"1px solid #ccc",margin:10,padding:10}}>
+          <p>{r.date} / {r.name}</p>
+          <p>{r.place}</p>
+          <p>{r.start}〜{r.end}（{r.duration}）</p>
+          <p>{r.content}</p>
+          <p>{r.note}</p>
+          <p>担当：{r.staff}</p>
+          <p>売上：{r.total} 円</p>
+
+          <button onClick={()=>edit(r)}>編集</button>
+          <button onClick={()=>remove(r.id)}>削除</button>
+        </div>
+      ))}
+    </div>
+  );
+}
