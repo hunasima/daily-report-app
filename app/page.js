@@ -36,7 +36,7 @@ export default function Home() {
   };
 
   const change = (k,v)=>{
-    setForm(prev => ({ ...prev, [k]: v }));
+   setForm(prev => ({ ...prev, [k]: v }));
   };
 
   useEffect(()=>{
