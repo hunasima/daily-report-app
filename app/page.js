@@ -30,89 +30,48 @@ export default function Home() {
     setForm((prev) => ({ ...prev, [k]: v }));
   };
 
-  // ✅ リアルタイム取得
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "reports"), (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
+      setList(snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
-      setList(data);
+      })));
     });
     return () => unsub();
   }, []);
 
-  // ✅ 保存
-  const add = async () => {
+  const save = async () => {
     if (!form.name) return;
 
     if (editId) {
-      // 編集
       await updateDoc(doc(db, "reports", editId), form);
       setEditId(null);
     } else {
-      // 新規
       await addDoc(collection(db, "reports"), form);
     }
-
     setForm({});
   };
 
-  // ✅ 削除
   const remove = async (id) => {
     await deleteDoc(doc(db, "reports", id));
   };
 
-  // ✅ 編集開始
-  const startEdit = (item) => {
+  const edit = (item) => {
     setForm(item);
     setEditId(item.id);
   };
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>日報アプリ（完成版）</h2>
+      <h2>日報アプリ（最終版）</h2>
 
-      <input
-        placeholder="利用者名"
-        value={form.name || ""}
-        onChange={(e) => change("name", e.target.value)}
-      />
-      <input
-        placeholder="迎先"
-        value={form.place || ""}
-        onChange={(e) => change("place", e.target.value)}
-      />
-      <textarea
-        placeholder="内容"
-        value={form.content || ""}
-        onChange={(e) => change("content", e.target.value)}
-      />
+      {/* 入力項目 */}
+      <input type="date" value={form.date || ""} onChange={(e) => change("date", e.target.value)} />
+      <input placeholder="利用者名" value={form.name || ""} onChange={(e) => change("name", e.target.value)} />
+      <input placeholder="迎先" value={form.place || ""} onChange={(e) => change("place", e.target.value)} />
 
-      {/* 保存ボタン */}
-      <button onClick={add}>
-        {editId ? "更新" : "保存"}
-      </button>
+      <input type="time" value={form.start || ""} onChange={(e) => change("start", e.target.value)} />
+      <input type="time" value={form.end || ""} onChange={(e) => change("end", e.target.value)} />
 
-      <hr />
+      <textarea placeholder="内容" value={form.content || ""} onChange={(e) => change("content", e.target.value)} />
 
-      {list.map((r) => (
-        <div key={r.id} style={{ border: "1px solid #ccc", margin: 10, padding: 10 }}>
-          <p>{r.name}</p>
-          <p>{r.place}</p>
-          <p>{r.content}</p>
-
-          {/* 🔥 編集 */}
-          <button onClick={() => startEdit(r)}>
-            編集
-          </button>
-
-          {/* 🔥 削除 */}
-          <button onClick={() => remove(r.id)}>
-            削除
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
