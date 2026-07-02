@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -12,13 +11,12 @@ import {
   onSnapshot
 } from "firebase/firestore";
 
-const firebaseConfig = {
+const app = initializeApp({
   apiKey: "AIzaSyAFGeQvwzKWiqbn1-X7uo6aTjW1KLGSvK0",
   authDomain: "daily-report-27522.firebaseapp.com",
   projectId: "daily-report-27522"
-};
+});
 
-const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 export default function Home() {
@@ -26,32 +24,31 @@ export default function Home() {
   const [list, setList] = useState([]);
   const [editId, setEditId] = useState(null);
 
-  const change = (k, v) => {
-    setForm(prev => ({ ...prev, [k]: v })); // ✅ 重要
+  const change = (k,v)=>{
+    setForm(prev => ({ ...prev, [k]: v }));
   };
 
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, "reports"), snap => {
-      setList(snap.docs.map(d => ({
-        id: d.id,
+  useEffect(()=>{
+    const unsub = onSnapshot(collection(db,"reports"),snap=>{
+      setList(snap.docs.map(d=>({
+        id:d.id,
         ...d.data()
       })));
     });
-    return () => unsub();
-  }, []);
+    return ()=>unsub();
+  },[]);
 
-  // 計算
   const transport = (Number(form.distance)||0)*40;
 
   const total =
-    (Number(form.cash)||0) +
-    (Number(form.receivable)||0) +
-    (Number(form.toll)||0) +
-    (Number(form.advance)||0) -
-    (Number(form.use)||0) +
+    (Number(form.cash)||0)+
+    (Number(form.receivable)||0)+
+    (Number(form.toll)||0)+
+    (Number(form.advance)||0)-
+    (Number(form.use)||0)+
     transport;
 
-  const save = async () => {
+  const save = async ()=>{
     const data = {
       ...form,
       transport,
@@ -77,8 +74,7 @@ export default function Home() {
     setEditId(r.id);
   };
 
-  // CSV（全項目）
-  const downloadCSV = () => {
+  const downloadCSV = ()=>{
     const headers = [
       "日付","利用者","担当","開始","終了",
       "内容","備考",
@@ -86,7 +82,7 @@ export default function Home() {
       "距離","交通費","売上合計"
     ];
 
-    const rows = list.map(r => [
+    const rows = list.map(r=>[
       r.date,r.name,r.staff,r.start,r.end,
       r.content,r.note,
       r.cash,r.receivable,r.advance,r.toll,r.use,
@@ -97,19 +93,18 @@ export default function Home() {
 
     const bom = new Uint8Array([0xEF,0xBB,0xBF]);
     const blob = new Blob([bom,csv]);
-
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement("a");
     a.href = url;
-    a.download = "report.csv";
+    a.download="report.csv";
     a.click();
   };
 
   return (
-    <div style={{ padding:20 }}>
-      <h2>日報（完全版）</h2>
+    <div style={{padding:20}}>
+      <h2>日報（完成版）</h2>
 
-      {/* 入力 */}
       <input type="date" value={form.date||""} onChange={e=>change("date",e.target.value)} />
       <input placeholder="利用者" value={form.name||""} onChange={e=>change("name",e.target.value)} />
       <input placeholder="担当" value={form.staff||""} onChange={e=>change("staff",e.target.value)} />
@@ -136,9 +131,8 @@ export default function Home() {
 
       <hr/>
 
-      {/* Excel風 */}
-      <table border="1" style={{ width:"100%" }}>
-        <thead style={{ background:"#2f6b6f", color:"#fff" }}>
+      <table border="1" style={{width:"100%"}}>
+        <thead style={{background:"#2f6b6f",color:"#fff"}}>
           <tr>
             <th>日付</th>
             <th>利用者</th>
@@ -148,7 +142,6 @@ export default function Home() {
             <th>備考</th>
             <th>売上合計</th>
             <th>立替</th>
-            <th>現金使用</th>
             <th>操作</th>
           </tr>
         </thead>
@@ -164,5 +157,15 @@ export default function Home() {
               <td>{r.note}</td>
               <td>{r.total}</td>
               <td>{r.advance}</td>
-              <td>{r.use}</td>
               <td>
+                <button onClick={()=>edit(r)}>編集</button>
+                <button onClick={()=>remove(r.id)}>削除</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+    </div>
+  );
+}
