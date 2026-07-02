@@ -74,6 +74,30 @@ export default function Home() {
   };
 
   const edit = (r) => {
+const downloadCSV = () => {
+  const headers = [
+    "日付","利用者","担当","開始","終了","内容","売上合計","立替"
+  ];
+
+  const rows = list.map(r => [
+    r.date, r.name, r.staff, r.start, r.end,
+    r.content, r.total, r.advance
+  ]);
+<button onClick={downloadCSV}>CSV</button>
+
+  const csv = [headers, ...rows]
+    .map(e => e.join(","))
+    .join("\n");
+
+  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+  const blob = new Blob([bom, csv]);
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "report.csv";
+  a.click();
+};
     setForm(r);
     setEditId(r.id);
   };
@@ -106,37 +130,36 @@ export default function Home() {
       <hr/>
 
       {/* 表 */}
-      <table border="1" style={{ width:"100%" }}>
-        <thead style={{ background:"#2f6b6f", color:"#fff" }}>
-          <tr>
-            <th>日付</th>
-            <th>利用者</th>
-            <th>担当</th>
-            <th>時間</th>
-            <th>内容</th>
-            <th>売上合計</th>
-            <th>立替</th>
-            <th>操作</th>
-          </tr>
-        </thead>
+      <thead style={{ background:"#2f6b6f", color:"#fff" }}>
+  <tr>
+    <th>日付</th>
+    <th>利用者</th>
+    <th>担当</th>
+    <th>時間</th>
+    <th>内容</th>
+    <th>売上合計</th>
+    <th>立替</th>
+    <th>操作</th>
+  </tr>
+</thead>
 
-        <tbody>
-          {list.map((r)=>(
-            <tr key={r.id}>
-              <td>{r.date}</td>
-              <td>{r.name}</td>
-              <td>{r.staff}</td>
-              <td>{timeText(r)}</td>
-              <td>{r.content}</td>
-              <td>{r.total}</td>
-              <td>{r.advance}</td>
-              <td>
-                <button onClick={()=>edit(r)}>編集</button>
-                <button onClick={()=>remove(r.id)}>削除</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+<tbody>
+  {list.map((r)=>(
+    <tr key={r.id}>
+      <td>{r.date}</td>
+      <td>{r.name}</td>
+      <td>{r.staff}</td>
+      <td>{r.start}〜{r.end}</td>
+      <td>{r.content}</td>
+      <td>{r.total}</td>
+      <td>{r.advance}</td>
+      <td>
+        <button onClick={()=>edit(r)}>編集</button>
+        <button onClick={()=>remove(r.id)}>削除</button>
+      </td>
+    </tr>
+  ))}
+</tbody>
       </table>
 
     </div>
