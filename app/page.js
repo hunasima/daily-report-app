@@ -1,6 +1,6 @@
-"use client";
-import { useState, useEffect, useRef } from "react";
 
+"use client";
+import { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -25,18 +25,8 @@ export default function Home() {
   const [list, setList] = useState([]);
   const [editId, setEditId] = useState(null);
 
-  // ✅ Enter移動用
-  const refs = [];
-
-  const handleKey = (e, i) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      refs[i + 1]?.focus();
-    }
-  };
-
   const change = (k,v)=>{
-   setForm(prev => ({ ...prev, [k]: v }));
+    setForm(prev => ({ ...prev, [k]: v }));
   };
 
   useEffect(()=>{
@@ -52,11 +42,11 @@ export default function Home() {
   const transport = (Number(form.distance)||0)*40;
 
   const total =
-    (Number(form.cash)||0)+
-    (Number(form.receivable)||0)+
-    (Number(form.toll)||0)+
-    (Number(form.advance)||0)-
-    (Number(form.use)||0)+
+    (Number(form.cash)||0) +
+    (Number(form.receivable)||0) +
+    (Number(form.toll)||0) +
+    (Number(form.advance)||0) -
+    (Number(form.use)||0) +
     transport;
 
   const save = async ()=>{
@@ -81,14 +71,20 @@ export default function Home() {
     setEditId(r.id);
   };
 
-  // CSV
   const downloadCSV = ()=>{
-    const headers = ["日付","利用者","迎先","担当","時間","内容","備考","売上合計"];
+    const headers = [
+      "日付","利用者","迎先","担当","時間",
+      "内容","備考","現金売上","売掛","立替",
+      "有料道路","現金使用","距離","交通費","売上合計"
+    ];
 
     const rows = list.map(r=>[
       r.date,r.name,r.place,r.staff,
       `${r.start||""}～${r.end||""}`,
-      r.content,r.note,r.total
+      r.content,r.note,
+      r.cash,r.receivable,r.advance,
+      r.toll,r.use,r.distance,
+      r.transport,r.total
     ]);
 
     const csv = [headers,...rows].map(e=>e.join(",")).join("\n");
@@ -98,41 +94,38 @@ export default function Home() {
 
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download="report.csv";
+    a.download = "report.csv";
     a.click();
   };
 
   return (
     <div style={{padding:20}}>
-      <h2>日報完成版</h2>
+      <h2>日報（完成）</h2>
 
-      <input ref={el=>refs[0]=el} onKeyDown={e=>handleKey(e,0)} type="date" value={form.date||""} onChange={e=>change("date",e.target.value)} />
+      <input type="date" value={form.date||""} onChange={e=>change("date",e.target.value)} />
+      <input placeholder="利用者" value={form.name||""} onChange={e=>change("name",e.target.value)} />
+      <input placeholder="迎先" value={form.place||""} onChange={e=>change("place",e.target.value)} />
+      <input placeholder="担当" value={form.staff||""} onChange={e=>change("staff",e.target.value)} />
 
-      <input ref={el=>refs[1]=el} onKeyDown={e=>handleKey(e,1)} placeholder="利用者" value={form.name||""} onChange={e=>change("name",e.target.value)} />
+      <input type="time" value={form.start||""} onChange={e=>change("start",e.target.value)} />
+      <input type="time" value={form.end||""} onChange={e=>change("end",e.target.value)} />
 
-      <input ref={el=>refs[2]=el} onKeyDown={e=>handleKey(e,2)} placeholder="迎先" value={form.place||""} onChange={e=>change("place",e.target.value)} />
+      <input placeholder="内容" value={form.content||""} onChange={e=>change("content",e.target.value)} />
+      <input placeholder="備考" value={form.note||""} onChange={e=>change("note",e.target.value)} />
 
-      <input ref={el=>refs[3]=el} onKeyDown={e=>handleKey(e,3)} placeholder="担当" value={form.staff||""} onChange={e=>change("staff",e.target.value)} />
+      <input placeholder="現金" value={form.cash||""} onChange={e=>change("cash",e.target.value)} />
+      <input placeholder="売掛" value={form.receivable||""} onChange={e=>change("receivable",e.target.value)} />
+      <input placeholder="立替" value={form.advance||""} onChange={e=>change("advance",e.target.value)} />
+      <input placeholder="有料道路" value={form.toll||""} onChange={e=>change("toll",e.target.value)} />
+      <input placeholder="現金使用" value={form.use||""} onChange={e=>change("use",e.target.value)} />
 
-      <input ref={el=>refs[4]=el} onKeyDown={e=>handleKey(e,4)} type="time" value={form.start||""} onChange={e=>change("start",e.target.value)} />
-
-      <input ref={el=>refs[5]=el} onKeyDown={e=>handleKey(e,5)} type="time" value={form.end||""} onChange={e=>change("end",e.target.value)} />
-
-      <input ref={el=>refs[6]=el} onKeyDown={e=>handleKey(e,6)} placeholder="内容" value={form.content||""} onChange={e=>change("content",e.target.value)} />
-
-      <input ref={el=>refs[7]=el} onKeyDown={e=>handleKey(e,7)} placeholder="備考" value={form.note||""} onChange={e=>change("note",e.target.value)} />
-
-      <input ref={el=>refs[8]=el} onKeyDown={e=>handleKey(e,8)} placeholder="現金売上" value={form.cash||""} onChange={e=>change("cash",e.target.value)} />
-
-      <input ref={el=>refs[9]=el} onKeyDown={e=>handleKey(e,9)} placeholder="売掛" value={form.receivable||""} onChange={e=>change("receivable",e.target.value)} />
-
-      <input ref={el=>refs[10]=el} onKeyDown={e=>handleKey(e,10)} placeholder="距離" value={form.distance||""} onChange={e=>change("distance",e.target.value)} />
+      <input placeholder="距離" value={form.distance||""} onChange={e=>change("distance",e.target.value)} />
 
       <p>交通費：{transport}</p>
       <p>売上合計：{total}</p>
 
-      <button onClick={save}>{editId?"更新":"保存"}</button>
-      <button onClick={downloadCSV}>CSV</button>
+      <button onClick={save}>{editId ? "更新":"保存"}</button>
+      <button onClick={downloadCSV}>CSVton>
 
       <hr/>
 
@@ -145,13 +138,14 @@ export default function Home() {
             <th>担当</th>
             <th>時間</th>
             <th>内容</th>
-            <th>売上合計</th>
+            <th>備考</th>
+            <th>売上</th>
             <th>操作</th>
           </tr>
         </thead>
 
         <tbody>
-          {list.=>(
+          {list.map(r=>(
             <tr key={r.id}>
               <td>{r.date}</td>
               <td>{r.name}</td>
@@ -159,6 +153,7 @@ export default function Home() {
               <td>{r.staff}</td>
               <td>{r.start}～{r.end}</td>
               <td>{r.content}</td>
+              <td>{r.note}</td>
               <td>{r.total}</td>
               <td>
                 <button onClick={()=>edit(r)}>編集</button>
