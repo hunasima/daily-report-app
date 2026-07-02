@@ -27,11 +27,11 @@ export default function Home() {
   const [editId, setEditId] = useState(null);
 
   const change = (k, v) => {
-    setForm(prev => ({ ...prev, [k]: v })); // ←ここ重要
+    setForm(prev => ({ ...prev, [k]: v })); // ✅ 重要
   };
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "reports"), (snap) => {
+    const unsub = onSnapshot(collection(db, "reports"), snap => {
       setList(snap.docs.map(d => ({
         id: d.id,
         ...d.data()
@@ -41,11 +41,14 @@ export default function Home() {
   }, []);
 
   // 計算
-  const transport = (Number(form.distance) || 0) * 40;
+  const transport = (Number(form.distance)||0)*40;
 
   const total =
     (Number(form.cash)||0) +
     (Number(form.receivable)||0) +
+    (Number(form.toll)||0) +
+    (Number(form.advance)||0) -
+    (Number(form.use)||0) +
     transport;
 
   const save = async () => {
@@ -55,17 +58,17 @@ export default function Home() {
       total
     };
 
-    if (editId) {
-      await updateDoc(doc(db,"reports",editId), data);
+    if(editId){
+      await updateDoc(doc(db,"reports",editId),data);
       setEditId(null);
-    } else {
-      await addDoc(collection(db,"reports"), data);
+    }else{
+      await addDoc(collection(db,"reports"),data);
     }
 
     setForm({});
   };
 
-  const remove = async (id)=>{
+  const remove = async(id)=>{
     await deleteDoc(doc(db,"reports",id));
   };
 
@@ -74,17 +77,20 @@ export default function Home() {
     setEditId(r.id);
   };
 
-  // CSV
+  // CSV（全項目）
   const downloadCSV = () => {
-    const headers = ["日付","利用者","担当","時間","内容","売上合計"];
+    const headers = [
+      "日付","利用者","担当","開始","終了",
+      "内容","備考",
+      "現金売上","売掛","立替","有料道路","現金使用",
+      "距離","交通費","売上合計"
+    ];
 
     const rows = list.map(r => [
-      r.date,
-      r.name,
-      r.staff,
-      `${r.start || ""}～${r.end || ""}`,
-      r.content,
-      r.total
+      r.date,r.name,r.staff,r.start,r.end,
+      r.content,r.note,
+      r.cash,r.receivable,r.advance,r.toll,r.use,
+      r.distance,r.transport,r.total
     ]);
 
     const csv = [headers,...rows].map(e=>e.join(",")).join("\n");
@@ -101,7 +107,7 @@ export default function Home() {
 
   return (
     <div style={{ padding:20 }}>
-      <h2>日報（最終安定版）</h2>
+      <h2>日報（完全版）</h2>
 
       {/* 入力 */}
       <input type="date" value={form.date||""} onChange={e=>change("date",e.target.value)} />
@@ -112,20 +118,25 @@ export default function Home() {
       <input type="time" value={form.end||""} onChange={e=>change("end",e.target.value)} />
 
       <input placeholder="内容" value={form.content||""} onChange={e=>change("content",e.target.value)} />
+      <input placeholder="備考" value={form.note||""} onChange={e=>change("note",e.target.value)} />
 
       <input placeholder="現金売上" value={form.cash||""} onChange={e=>change("cash",e.target.value)} />
       <input placeholder="売掛" value={form.receivable||""} onChange={e=>change("receivable",e.target.value)} />
+      <input placeholder="立替" value={form.advance||""} onChange={e=>change("advance",e.target.value)} />
+      <input placeholder="有料道路" value={form.toll||""} onChange={e=>change("toll",e.target.value)} />
+      <input placeholder="現金使用" value={form.use||""} onChange={e=>change("use",e.target.value)} />
+
       <input placeholder="距離" value={form.distance||""} onChange={e=>change("distance",e.target.value)} />
 
       <p>交通費：{transport}</p>
       <p>売上合計：{total}</p>
 
-      <button onClick={save}>{editId ? "更新" : "保存"}</button>
+      <button onClick={save}>{editId?"更新":"保存"}</button>
       <button onClick={downloadCSV}>CSV</button>
 
       <hr/>
 
-      {/* 表 */}
+      {/* Excel風 */}
       <table border="1" style={{ width:"100%" }}>
         <thead style={{ background:"#2f6b6f", color:"#fff" }}>
           <tr>
@@ -134,7 +145,10 @@ export default function Home() {
             <th>担当</th>
             <th>時間</th>
             <th>内容</th>
+            <th>備考</th>
             <th>売上合計</th>
+            <th>立替</th>
+            <th>現金使用</th>
             <th>操作</th>
           </tr>
         </thead>
@@ -145,19 +159,10 @@ export default function Home() {
               <td>{r.date}</td>
               <td>{r.name}</td>
               <td>{r.staff}</td>
-              <td>{r.start}～{r.end}</td>
+              <td>{r.start}〜{r.end}</td>
               <td>{r.content}</td>
+              <td>{r.note}</td>
               <td>{r.total}</td>
+              <td>{r.advance}</td>
+              <td>{r.use}</td>
               <td>
-                <button onClick={()=>edit(r)}>編集</button>
-                <button onClick={()=>remove(r.id)}>削除</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-    </div>
-  );
-}
-``
