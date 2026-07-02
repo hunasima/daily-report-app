@@ -61,54 +61,77 @@ export default function Home() {
     (Number(form.use)||0) +
     transport;
 
-  const save = async () => {
-    const data = {
-      ...form,
-      duration: calcTime(),
-      transport,
-      total
-    };
+ const save = async () => {
+  const transport = (Number(form.distance) || 0) * 40;
 
-    if (editId) {
-      await updateDoc(doc(db,"reports",editId),data);
-      setEditId(null);
-    } else {
-      await addDoc(collection(db,"reports"),data);
-    }
+  const data = {
+    date: form.date || "",
+    name: form.name || "",
+    place: form.place || "",
+    staff: form.staff || "",
+    start: form.start || "",
+    end: form.end || "",
+    content: form.content || "",
+    note: form.note || "",
 
-    setForm({});
+    cash: Number(form.cash) || 0,
+    receivable: Number(form.receivable) || 0,
+    advance: Number(form.advance) || 0,
+    toll: Number(form.toll) || 0,
+    use: Number(form.use) || 0,
+    distance: Number(form.distance) || 0,
+
+    transport: transport,
+
+    duration: calcTime(),
+
+    total:
+      (Number(form.cash) || 0) +
+      (Number(form.receivable) || 0) +
+      (Number(form.toll) || 0) +
+      transport
   };
 
-  const remove = async(id)=>{
-    await deleteDoc(doc(db,"reports",id));
-  };
+  if (editId) {
+    await updateDoc(doc(db, "reports", editId), data);
+    setEditId(null);
+  } else {
+    await addDoc(collection(db, "reports"), data);
+  }
 
-  const edit = (r)=>{
-    setForm(r);
-    setEditId(r.id);
-  };
+  setForm({});
+};
 
   // ✅ CSV
-  const downloadCSV = () => {
-    const headers = ["日付","利用者","迎先","担当","内容","売上"];
+  
+const downloadCSV = () => {
+  const headers = [
+    "日付","利用者","迎先","担当",
+    "開始","終了","利用時間",
+    "内容","備考",
+    "現金売上","売掛","立替","有料道路","現金使用",
+    "距離","交通費","売上合計"
+  ];
 
-    const rows = list.map(r => [
-      r.date, r.name, r.place, r.staff,
-      r.content, r.total
-    ]);
+  const rows = list.map(r => [
+    r.date,r.name,r.place,r.staff,
+    r.start,r.end,r.duration,
+    r.content,r.note,
+    r.cash,r.receivable,r.advance,r.toll,r.use,
+    r.distance,r.transport,r.total
+  ]);
 
-    const csv = [headers,...rows].map(e=>e.join(",")).join("\n");
+  const csv = [headers,...rows].map(e=>e.join(",")).join("\n");
 
-    const bom = new Uint8Array([0xEF,0xBB,0xBF]);
-    const blob = new Blob([bom,csv]);
+  const bom = new Uint8Array([0xEF,0xBB,0xBF]);
+  const blob = new Blob([bom,csv]);
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "report.csv";
-    a.click();
-  };
-
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "report.csv";
+  a.click();
+};
   return (
     <div style={{ padding:20 }}>
       <h2>日報（完成版）</h2>
