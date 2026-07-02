@@ -49,17 +49,18 @@ export default function Home() {
     return `${Math.floor(diff/60)}時間${diff%60}分`;
   };
 
-  // ✅ 交通費（距離 × 40）
+  // ✅ 交通費（距離×40）
   const transport = (Number(form.distance) || 0) * 40;
 
-  // ✅ 売上合計
+  // ✅ 合計
   const total =
     (Number(form.cash)||0) +
     (Number(form.receivable)||0) +
     (Number(form.toll)||0) +
+    (Number(form.advance)||0) -
+    (Number(form.use)||0) +
     transport;
 
-  // ✅ 保存
   const save = async () => {
     const data = {
       ...form,
@@ -78,7 +79,7 @@ export default function Home() {
     setForm({});
   };
 
-  const remove = async (id)=>{
+  const remove = async(id)=>{
     await deleteDoc(doc(db,"reports",id));
   };
 
@@ -87,13 +88,36 @@ export default function Home() {
     setEditId(r.id);
   };
 
+  // ✅ CSV
+  const downloadCSV = () => {
+    const headers = ["日付","利用者","迎先","担当","内容","売上"];
+
+    const rows = list.map(r => [
+      r.date, r.name, r.place, r.staff,
+      r.content, r.total
+    ]);
+
+    const csv = [headers,...rows].map(e=>e.join(",")).join("\n");
+
+    const bom = new Uint8Array([0xEF,0xBB,0xBF]);
+    const blob = new Blob([bom,csv]);
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "report.csv";
+    a.click();
+  };
+
   return (
     <div style={{ padding:20 }}>
       <h2>日報（完成版）</h2>
 
+      {/* 入力 */}
       <input type="date" value={form.date||""} onChange={(e)=>change("date",e.target.value)} />
       <input placeholder="利用者名" value={form.name||""} onChange={(e)=>change("name",e.target.value)} />
       <input placeholder="迎先" value={form.place||""} onChange={(e)=>change("place",e.target.value)} />
+      <input placeholder="担当者" value={form.staff||""} onChange={(e)=>change("staff",e.target.value)} />
 
       <input type="time" value={form.start||""} onChange={(e)=>change("start",e.target.value)} />
       <input type="time" value={form.end||""} onChange={(e)=>change("end",e.target.value)} />
@@ -103,27 +127,29 @@ export default function Home() {
 
       <input placeholder="現金売上" value={form.cash||""} onChange={(e)=>change("cash",e.target.value)} />
       <input placeholder="売掛" value={form.receivable||""} onChange={(e)=>change("receivable",e.target.value)} />
+      <input placeholder="立替" value={form.advance||""} onChange={(e)=>change("advance",e.target.value)} />
       <input placeholder="有料道路" value={form.toll||""} onChange={(e)=>change("toll",e.target.value)} />
+      <input placeholder="現金使用" value={form.use||""} onChange={(e)=>change("use",e.target.value)} />
 
       <input placeholder="距離" value={form.distance||""} onChange={(e)=>change("distance",e.target.value)} />
 
       <p>利用時間：{calcTime()}</p>
-      <p>交通費：{transport} 円</p>
-      <p>売上合計：{total} 円</p>
+      <p>交通費：{transport}</p>
+      <p>売上合計：{total}</p>
 
-      <button onClick={save}>
-        {editId ? "更新" : "保存"}
-      </button>
+      <button onClick={save}>{editId ? "更新" : "保存"}</button>
+      <button onClick={downloadCSV}>CSV</button>
 
       <hr/>
 
+      {/* 一覧 */}
       <table border="1" style={{ width:"100%" }}>
         <thead style={{ background:"#2f6b6f", color:"#fff" }}>
           <tr>
             <th>日付</th>
             <th>利用者</th>
             <th>迎先</th>
-            <th>時間</th>
+            <th>担当</th>
             <th>内容</th>
             <th>売上</th>
             <th>操作</th>
@@ -136,7 +162,7 @@ export default function Home() {
               <td>{r.date}</td>
               <td>{r.name}</td>
               <td>{r.place}</td>
-              <td>{r.start}〜{r.end}</td>
+              <td>{r.staff}</td>
               <td>{r.content}</td>
               <td>{r.total}</td>
               <td>
