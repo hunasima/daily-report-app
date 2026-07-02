@@ -26,9 +26,8 @@ export default function Home() {
   const [list, setList] = useState([]);
   const [editId, setEditId] = useState(null);
 
-  // ✅ ここ直し！！
   const change = (k, v) => {
-    setForm((prev) => ({ ...prev, [k]: v }));
+    setForm((prev) => ({ ...prev, [k]: v })); // ✅ 重要修正
   };
 
   useEffect(() => {
@@ -41,13 +40,31 @@ export default function Home() {
     return () => unsub();
   }, []);
 
+  // 利用時間
+  const calcTime = () => {
+    if (!form.start || !form.end) return "";
+    const s = new Date(`2024-01-01T${form.start}`);
+    const e = new Date(`2024-01-01T${form.end}`);
+    const diff = (e - s) / 60000;
+    return `${Math.floor(diff/60)}時間${diff%60}分`;
+  };
+
+  // 合計
   const calcTotal = (r) => {
-    return (Number(r.cash)||0)+(Number(r.receivable)||0);
+    return (
+      (Number(r.cash)||0)+
+      (Number(r.receivable)||0)+
+      (Number(r.advance)||0)+
+      (Number(r.toll)||0)-
+      (Number(r.use)||0)-
+      (Number(r.transport)||0)
+    );
   };
 
   const save = async () => {
     const data = {
       ...form,
+      duration: calcTime(),
       total: calcTotal(form)
     };
 
@@ -57,11 +74,10 @@ export default function Home() {
     } else {
       await addDoc(collection(db,"reports"),data);
     }
-
     setForm({});
   };
 
-  const remove = async(id)=>{
+  const remove = async (id)=>{
     await deleteDoc(doc(db,"reports",id));
   };
 
@@ -70,42 +86,132 @@ export default function Home() {
     setEditId(r.id);
   };
 
+  // CSV（文字化け対策）
+  const downloadCSV = () => {
+    const headers = ["日付","利用者","迎先","時間","内容","売上"];
+
+    const rows = list.map(r => [
+      r.date, r.name, r.place,
+      `${r.start}〜${r.end}`,
+      r.content,
+      r.total
+    ]);
+
+    const csv = [headers,...rows].map(e=>e.join(",")).join("\n");
+
+    const bom = new Uint8Array([0xEF,0xBB,0xBF]);
+    const blob = new Blob([bom,csv]);
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "report.csv";
+    a.click();
+  };
+
   return (
     <div style={{ padding:20 }}>
-      <h2>日報アプリ（完全版）</h2>
+      <h2>日報（Excel風）</h2>
 
-      {/* 入力 */}
-      <input type="date" value={form.date||""} onChange={(e)=>change("date",e.target.value)} />
-      <input placeholder="利用者名" value={form.name||""} onChange={(e)=>change("name",e.target.value)} />
-      <input placeholder="迎先" value={form.place||""} onChange={(e)=>change("place",e.target.value)} />
+      {/* 入力表 */}
+      <table border="1">
+        <tbody>
+          <tr>
+            <td>日付</td>
+            <td><input type="date" value={form.date||""} onChange={(e)=>change("date",e.target.value)} /></td>
 
-      <textarea placeholder="内容①" value={form.content1||""} onChange={(e)=>change("content1",e.target.value)} />
-      <textarea placeholder="内容②" value={form.content2||""} onChange={(e)=>change("content2",e.target.value)} />
+            <td>利用者名</td>
+            <td><input value={form.name||""} onChange={(e)=>change("name",e.target.value)} /></td>
+          </tr>
 
-      <input placeholder="現金売上" value={form.cash||""} onChange={(e)=>change("cash",e.target.value)} />
-      <input placeholder="売掛" value={form.receivable||""} onChange={(e)=>change("receivable",e.target.value)} />
+          <tr>
+            <td>迎先</td>
+            <td><input value={form.place||""} onChange={(e)=>change("place",e.target.value)} /></td>
+
+            <td>担当者</td>
+            <td><input value={form.staff||""} onChange={(e)=>change("staff",e.target.value)} /></td>
+          </tr>
+
+          <tr>
+            <td>開始</td>
+            <td><input type="time" value={form.start||""} onChange={(e)=>change("start",e.target.value)} /></td>
+
+            <td>終了</td>
+            <td><input type="time" value={form.end||""} onChange={(e)=>change("end",e.target.value)} /></td>
+          </tr>
+
+          <tr>
+            <td>内容</td>
+            <td colSpan="3"><input value={form.content||""} onChange={(e)=>change("content",e.target.value)} /></td>
+          </tr>
+
+          <tr>
+            <td>備考</td>
+            <td colSpan="3"><input value={form.note||""} onChange={(e)=>change("note",e.target.value)} /></td>
+          </tr>
+
+          <tr>
+            <td>現金売上</td>
+            <td><input value={form.cash||""} onChange={(e)=>change("cash",e.target.value)} /></td>
+
+            <td>売掛</td>
+            <td><input value={form.receivable||""} onChange={(e)=>change("receivable",e.target.value)} /></td>
+          </tr>
+
+          <tr>
+            <td>立替</td>
+            <td><input value={form.advance||""} onChange={(e)=>change("advance",e.target.value)} /></td>
+
+            <td>有料道路</td>
+            <td><input value={form.toll||""} onChange={(e)=>change("toll",e.target.value)} /></td>
+          </tr>
+
+          <tr>
+            <td>現金使用</td>
+            <td><input value={form.use||""} onChange={(e)=>change("use",e.target.value)} /></td>
+
+            <td>交通費</td>
+            <td><input value={form.transport||""} onChange={(e)=>change("transport",e.target.value)} /></td>
+          </tr>
+
+          <tr>
+            <td>距離</td>
+            <td><input value={form.distance||""} onChange={(e)=>change("distance",e.target.value)} /></td>
+
+            <td>利用時間</td>
+            <td>{calcTime()}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <br/>
 
       <button onClick={save}>{editId ? "更新" : "保存"}</button>
+      <button onClick={downloadCSV}>CSV</button>
 
       <hr/>
 
+      {/* 一覧（Excel風） */}
       <table border="1" style={{ width:"100%" }}>
-        <thead>
+        <thead style={{ background:"#2f6b6f", color:"#fff" }}>
           <tr>
-            <th>日付</th><th>利用者</th><th>迎先</th>
-            <th>内容①</th><th>内容②</th>
-            <th>売上</th><th>操作</th>
+            <th>日付</th>
+            <th>利用者</th>
+            <th>迎先</th>
+            <th>時間</th>
+            <th>内容</th>
+            <th>売上</th>
+            <th>操作</th>
           </tr>
         </thead>
-
         <tbody>
           {list.map((r)=>(
             <tr key={r.id}>
               <td>{r.date}</td>
               <td>{r.name}</td>
               <td>{r.place}</td>
-              <td>{r.content1}</td>
-              <td>{r.content2}</td>
+              <td>{r.start}〜{r.end}</td>
+              <td>{r.content}</td>
               <td>{r.total}</td>
               <td>
                 <button onClick={()=>edit(r)}>編集</button>
