@@ -22,6 +22,8 @@ const db = getFirestore(app);
 export default function Home() {
   const [form, setForm] = useState({});
   const [list, setList] = useState([]);
+  const [searchDate, setSearchDate] = useState("");
+  const [searchName, setSearchName] = useState("");
   const [editId, setEditId] = useState(null);
   const refs = useRef([]);
 
@@ -85,22 +87,37 @@ export default function Home() {
   const remove=async id=>{
     await deleteDoc(doc(db,"reports",id));
   };
+const monthTotal = list.reduce(
+  (sum, r) => sum + (Number(r.total) || 0),
+  0
+);
 
+const monthCount = list.length;
+const filteredList = list.filter((r) => {
+  const dateMatch =
+    !searchDate || r.date === searchDate;
+
+  const nameMatch =
+    !searchName ||
+    (r.name || "").includes(searchName);
+
+  return dateMatch && nameMatch;
+});
   // CSV
   const downloadCSV=()=>{
     const headers=[
       "日付","利用者","迎先","担当",
      "利用時間", "開始","終了",
       "内容","備考",
-      "現金","売掛","立替","有料道路","現金使用",
+      "現金売上","売掛","立替","有料道路","現金使用","現金使用内容",
       "距離","交通費","売上合計"
     ];
 
     const rows=list.map(r=>[
       r.date,r.name,r.place,r.staff,
       r.duration,r.start,r.end,
-      r.content,r.note,
-      r.cash,r.receivable,r.advance,r.toll,r.use,
+      r.content,`"${(r.note || "").replace(/"/g, '""')}"`,
+      r.cash,r.receivable,r.advance,r.toll,r.use,`"${(r.useNote || "").replace(/"/g, '""')}"`,
       r.distance,r.transport,r.total
     ]);
 
@@ -118,6 +135,24 @@ export default function Home() {
     <div style={{padding:20}}>
       <h2>日報 完成版</h2>
 
+<div style={{ marginBottom: "10px" }}>
+  <input
+    type="date"
+    value={searchDate}
+    onChange={(e) => setSearchDate(e.target.value)}
+  />
+
+  <input
+    placeholder="利用者検索"
+    value={searchName}
+    onChange={(e) => setSearchName(e.target.value)}
+    style={{ marginLeft: "10px" }}
+  />
+</div>
+
+<p>登録件数：{monthCount}件</p>
+<p>売上合計：{monthTotal.toLocaleString()}円</p>
+`
       <input ref={e=>refs.current[0]=e} onKeyDown={e=>next(e,0)} type="date"
         value={form.date||""} onChange={e=>change("date",e.target.value)} />
 
@@ -143,12 +178,17 @@ export default function Home() {
         placeholder="内容" value={form.content||""}
         onChange={e=>change("content",e.target.value)} />
 
-      <input ref={e=>refs.current[7]=e} onKeyDown={e=>next(e,7)}
-        placeholder="備考" value={form.note||""}
-        onChange={e=>change("note",e.target.value)} />
+      
+<textarea
+  ref={e=>refs.current[7]=e}
+  placeholder="備考"
+  value={form.note||""}
+  onChange={e=>change("note",e.target.value)}
+  style={{width:"200px",height:"60px"}}
+/>
 
       <input ref={e=>refs.current[8]=e} onKeyDown={e=>next(e,8)}
-        placeholder="現金" value={form.cash||""}
+        placeholder="現金売上" value={form.cash||""}
         onChange={e=>change("cash",e.target.value)} />
 
       <input ref={e=>refs.current[9]=e} onKeyDown={e=>next(e,9)}
@@ -167,7 +207,12 @@ export default function Home() {
         placeholder="現金使用" value={form.use||""}
         onChange={e=>change("use",e.target.value)} />
 
-      <input ref={e=>refs.current[13]=e} onKeyDown={e=>next(e,13)}
+      <input ref={e=>refs.current[14]=e}
+       onKeyDown={e=>next(e,14)}
+       placeholder="現金使用内容"
+       value={form.useNote||""}
+       onChange={e=>change("useNote",e.target.value)}/>
+      <input ref={e=>refs.current[15]=e} onKeyDown={e=>next(e,13)}
         placeholder="距離" value={form.distance||""}
         onChange={e=>change("nce",e.target.value)} />
 
@@ -179,36 +224,82 @@ export default function Home() {
       <button onClick={downloadCSV}>CSV</button>
 
       <hr/>
+<table style={{
+  width:"100%",
+  borderCollapse:"collapse",
+  marginTop:"20px",
+  fontSize:"14px"
+}}>
+  <thead style={{background:"#2f6b6f",color:"white"}}>
+    <tr>
+      <th>日付</th>
+      <th>利用者</th>
+      <th>迎先</th>
+      <th>担当</th>
+      <th>利用時間</th>
+      <th>時間</th>
+      <th>内容</th>
+      <th>備考</th>
+      <th>現金使用内容</th>
+      <th>売上</th>
+      <th>操作</th>
+    </tr>
+  </thead>
 
-      <table border="1" style={{width:"100%"}}>
-        <thead>
-          <tr>
-            <th>日付</th><th>利用者</th><th>迎先</th>
-            <th>担当</th><th>利用時間</th><th>時間</th>
-            <th>内容</th><th>備考</th>
-            <th>売上</th><th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.map(r=>(
-            <tr key={r.id}>
-              <td>{r.date}</td>
-              <td>{r.name}</td>
-              <td>{r.place}</td>
-              <td>{r.staff}</td>
-              <td>{r.duration}</td>
-              <td>{r.start}～{r.end}</td>
-              <td>{r.content}</td>
-              <td>{r.note}</td>
-              <td>{r.total}</td>
-              <td>
-                <button onClick={()=>edit(r)}>編集</button>
-                <button onClick={()=>remove(r.id)}>削除</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+ <tbody>
+  {filteredList.map(r=>(
+   
+<tr
+  key={r.id}
+  style={{ background: r.id % 2 === 0 ? "#f9f9f9" : "white" }}
+>
+
+     <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.date}</td>
+<td style={{border:"1px solid #ccc",padding:"6px"}}>{r.name}</td>
+<td style={{border:"1px solid #ccc",padding:"6px"}}>{r.place}</td>
+<td style={{border:"1px solid #ccc",padding:"6px"}}>{r.staff}</td>
+<td style={{border:"1px solid #ccc",padding:"6px"}}>{r.duration}</td>
+<td style={{border:"1px solid #ccc",padding:"6px"}}>{r.start}～{r.end}</td>
+<td style={{border:"1px solid #ccc",padding:"6px"}}>{r.content}</td>
+<td style={{
+  border:"1px solid #ccc",
+  padding:"6px",
+  whiteSpace:"pre-wrap"
+}}>
+  {r.note}
+</td>
+<td style={{border:"1px solid #ccc",padding:"6px"}}>{r.useNote}</td>
+<td style={{border:"1px solid #ccc",padding:"6px"}}>{r.total}</td>
+      <td>
+        <button
+  style={{
+    background:"#4CAF50",
+    color:"white",
+    border:"none",
+    padding:"5px 10px",
+    borderRadius:"5px",
+    cursor:"pointer"
+  }}
+  onClick={()=>edit(r)}
+>
+  編集
+</button>
+        <br/><br/>
+        <button style={{color:"red"}}
+          onClick={()=>{
+            if(confirm("本当に削除しますか？")){
+              remove(r.id);
+            }
+          }}>
+          削除
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+``
+</table>
+</div>
+);
 }
+
