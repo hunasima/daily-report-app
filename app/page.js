@@ -103,6 +103,28 @@ const filteredList = list.filter((r) => {
 
   return dateMatch && nameMatch;
 });
+
+const billStyle = {
+  background:"#FF9800",
+  color:"white",
+  border:"none",
+  borderRadius:"6px",
+  padding:"6px 10px",
+  margin:"5px",
+  cursor:"pointer",
+  fontWeight:"bold"
+};
+
+const reportStyle = {
+  background:"#2196F3",
+  color:"white",
+  border:"none",
+  borderRadius:"6px",
+  padding:"6px 10px",
+  margin:"5px",
+  cursor:"pointer",
+  fontWeight:"bold"
+};
   // CSV
   const downloadCSV=()=>{
     const headers=[
@@ -220,9 +242,81 @@ const filteredList = list.filter((r) => {
       <p>交通費：{transport}</p>
       <p>売上合計：{total}</p>
 
-      <button onClick={save}>{editId?"更新":"保存"}</button>
-      <button onClick={downloadCSV}>CSV</button>
+     <button
+  style={{
+    background:"#4CAF50",
+    color:"white",
+    border:"none",
+    borderRadius:"6px",
+    padding:"6px 10px",
+    margin:"5px"
+  }}
+  onClick={save}
+>
+  {editId ? "更新" : "保存"}
+</button>
 
+<button
+  style={{
+    background:"#1976D2",
+    color:"white",
+    border:"none",
+    borderRadius:"6px",
+    padding:"6px 10px",
+    margin:"5px"
+  }}
+  onClick={downloadCSV}
+>
+  CSV
+</button>
+
+<br /><br />
+
+<h3>帳票</h3>
+
+<button
+  style={billStyle}
+  onClick={() => window.open("/templates/請求書振替.xlsx", "_blank")}
+>
+  口座振替
+</button>
+
+<button
+  style={billStyle}
+  onClick={() => window.open("/templates/請求書振込.xlsx", "_blank")}
+>
+  振込
+</button>
+
+<button
+  style={billStyle}
+  onClick={() => window.open("/templates/請求書現金.xlsx", "_blank")}
+>
+  現金請求
+</button>
+
+<button
+  style={billStyle}
+  onClick={() => window.open("/templates/請求書他会社.xlsx", "_blank")}
+>
+  他会社対応
+</button>
+
+<br /><br />
+
+<button
+  style={reportStyle}
+  onClick={() => window.open("/templates/報告書.docx", "_blank")}
+>
+  報告書
+</button>
+
+<button
+  style={reportStyle}
+  onClick={() => window.open("/templates/FAX送信表 報告書入り.docx", "_blank")}
+>
+  FAX送付表
+</button>
       <hr/>
 <table style={{
   width:"100%",
