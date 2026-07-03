@@ -135,7 +135,7 @@ const reportStyle = {
       "距離","交通費","売上合計"
     ];
 
-    const rows=list.map(r=>[
+   const rows = filteredList.map(r => [
       r.date,r.name,r.place,r.staff,
       r.duration,r.start,r.end,
       r.content,`"${(r.note || "").replace(/"/g, '""')}"`,
