@@ -82,7 +82,10 @@ export default function Home() {
     setForm({});
   };
 const createInvoice = async (fileName) => {
-  const response = await fetch("/templates/請求書振替.xlsx");
+  
+const response =
+  await fetch(`/templates/${fileName}`);
+
   const arrayBuffer = await response.arrayBuffer();
 
   const workbook = new ExcelJS.Workbook();
@@ -327,28 +330,40 @@ const reportStyle = {
 
 <button
   style={billStyle}
- onClick={createInvoice}
+ onClick={() =>
+ createInvoice("請求書振替.xlsx")
+  }
 >
   口座振替
 </button>
 
 <button
   style={billStyle}
-  onClick={() => window.open("/templates/請求書振込.xlsx", "_blank")}
+  
+onClick={() =>
+  createInvoice("請求書振込.xlsx")
+}
+
 >
   振込
 </button>
 
 <button
   style={billStyle}
-  onClick={() => window.open("/templates/請求書現金.xlsx", "_blank")}
+  onClick={() =>
+  createInvoice("請求書現金.xlsx")
+}
 >
   現金請求
 </button>
 
 <button
   style={billStyle}
-  onClick={() => window.open("/templates/請求書他会社.xlsx", "_blank")}
+
+onClick={() =>
+  createInvoice("請求書他会社.xlsx")
+}
+
 >
   他会社対応
 </button>
