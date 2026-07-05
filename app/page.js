@@ -65,8 +65,7 @@ export default function Home() {
     (Number(form.cash)||0)+
     (Number(form.receivable)||0)+
     (Number(form.toll)||0)+
-    (Number(form.advance)||0)-
-    (Number(form.use)||0)+
+        
     transport;
 
   // 保存
@@ -283,20 +282,31 @@ const reportStyle = {
         placeholder="現金使用" value={form.use||""}
         onChange={e=>change("use",e.target.value)} />
 
-      <input ref={e=>refs.current[14]=e}
-       onKeyDown={e=>next(e,14)}
+      <input ref={e=>refs.current[13]=e}
+       onKeyDown={e=>next(e,13)}
        placeholder="現金使用内容"
        value={form.useNote||""}
        onChange={e=>change("useNote",e.target.value)}/>
-      <input ref={e=>refs.current[15]=e} onKeyDown={e=>next(e,13)}
-        placeholder="距離" value={form.distance||""}
-        onChange={e=>change("nce",e.target.value)} />
+      
+
+<input
+  ref={e=>refs.current[14]=e}
+  onKeyDown={e=>next(e,14
+
+  )}
+  placeholder="距離"
+  value={form.distance||""}
+  onChange={e=>change("distance",e.target.value)}
+/>
+
+
 
       <p>利用時間：{duration()}</p>
       <p>交通費：{transport}</p>
       <p>売上合計：{total}</p>
 
-     <button
+    <button
+  ref={e=>refs.current[15]=e}
   style={{
     background:"#4CAF50",
     color:"white",
