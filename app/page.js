@@ -22,7 +22,11 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 export default function Home() {
-  const [form, setForm] = useState({});
+  const today = new Date().toISOString().split("T")[0];
+
+const [form, setForm] = useState({
+  date: today
+});
   const [list, setList] = useState([]);
   const [searchDate, setSearchDate] = useState("");
   const [searchName, setSearchName] = useState("");
@@ -78,7 +82,11 @@ export default function Home() {
     }else{
       await addDoc(collection(db,"reports"),data);
     }
-    setForm({});
+    
+setForm({
+  date: today
+});
+
   };
 const createInvoice = async (fileName) => {
   
