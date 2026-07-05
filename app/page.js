@@ -465,7 +465,6 @@ const reportStyle = {
     </tr>
   ))}
 </tbody>
-``
 </table>
 </div>
 );
