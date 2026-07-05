@@ -71,34 +71,7 @@ export default function Home() {
 
   // 保存
   const save=async()=>{
-    const createInvoice = async () => {
-  if (!searchName) {
-    
-lert("保存直前");
-
-const buffer = await workbook.xlsx.writeBuffer();
-
-    return;
-  }
-
-  const response = await fetch("/templates/請求書振替.xlsx");
-  const arrayBuffer = await response.arrayBuffer();
-
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(arrayBuffer);
-
-  const sheet = workbook.getWorksheet(1);
-
-  // 利用者氏名
-  sheet.getCell("I5").value = searchName;
-
-  const buffer = await workbook.xlsx.writeBuffer();
-
-  saveAs(
-    new Blob([buffer]),
-    `${searchName}_請求書.xlsx`
-  );
-};
+  
     const data={...form,transport,total,duration:duration()};
     if(editId){
       await updateDoc(doc(db,"reports",editId),data);
@@ -125,7 +98,11 @@ filteredList.forEach((r, index) => {
   const row = 15 + index;
 
  
+if (!r.date) return;
+
 const d = r.date.split("-");
+
+
 
 sheet.getCell(`A${row}`).value =
   `${Number(d[1])}/${Number(d[2])}`;
