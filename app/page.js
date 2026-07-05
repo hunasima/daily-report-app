@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -69,6 +71,34 @@ export default function Home() {
 
   // 保存
   const save=async()=>{
+    const createInvoice = async () => {
+  if (!searchName) {
+    
+lert("保存直前");
+
+const buffer = await workbook.xlsx.writeBuffer();
+
+    return;
+  }
+
+  const response = await fetch("/templates/請求書振替.xlsx");
+  const arrayBuffer = await response.arrayBuffer();
+
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(arrayBuffer);
+
+  const sheet = workbook.getWorksheet(1);
+
+  // 利用者氏名
+  sheet.getCell("I5").value = searchName;
+
+  const buffer = await workbook.xlsx.writeBuffer();
+
+  saveAs(
+    new Blob([buffer]),
+    `${searchName}_請求書.xlsx`
+  );
+};
     const data={...form,transport,total,duration:duration()};
     if(editId){
       await updateDoc(doc(db,"reports",editId),data);
@@ -78,7 +108,50 @@ export default function Home() {
     }
     setForm({});
   };
+const createInvoice = async (fileName) => {
+  const response = await fetch("/templates/請求書振替.xlsx");
+  const arrayBuffer = await response.arrayBuffer();
 
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(arrayBuffer);
+
+  const sheet = workbook.getWorksheet(1);
+
+  
+sheet.getCell("I5").value =
+  filteredList[0]?.name || searchName;
+filteredList.forEach((r, index) => {
+  
+  const row = 15 + index;
+
+ 
+const d = r.date.split("-");
+
+sheet.getCell(`A${row}`).value =
+  `${Number(d[1])}/${Number(d[2])}`;
+sheet.getCell(`B${row}`).value = String(r.start || "");
+sheet.getCell(`C${row}`).value = String(r.end || "");
+
+  sheet.getCell(`D${row}`).value = r.content;
+ const timeText =
+  r.duration
+    ?.replace("時間", ":")
+    .replace("分", "") || "";
+
+sheet.getCell(`L${row}`).value =
+  timeText.replace(/:(\d)$/, ":0$1");
+  sheet.getCell(`M${row}`).value =
+  r.distance ? `${r.distance}km` : "";
+  sheet.getCell(`O${row}`).value = Number(r.total || 0);
+});
+
+  const buffer = await workbook.xlsx.writeBuffer();
+
+  saveAs(
+    new Blob([buffer]),
+    `${searchName}_請求書.xlsx`
+  );
+};
   const edit=r=>{
     setForm(r);
     setEditId(r.id);
@@ -155,6 +228,7 @@ const reportStyle = {
 
   return (
     <div style={{padding:20}}>
+    
       <h2>日報 完成版</h2>
 
 <div style={{ marginBottom: "10px" }}>
@@ -276,7 +350,7 @@ const reportStyle = {
 
 <button
   style={billStyle}
-  onClick={() => window.open("/templates/請求書振替.xlsx", "_blank")}
+ onClick={createInvoice}
 >
   口座振替
 </button>
