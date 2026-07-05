@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import PizZip from "pizzip";
+import Docxtemplater from "docxtemplater";
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -139,6 +141,11 @@ sheet.getCell(`L${row}`).value =
     `${searchName}_請求書.xlsx`
   );
 };
+
+const createReport = async () => {
+  alert("報告書作成テスト");
+};
+
   const edit=r=>{
     setForm(r);
     setEditId(r.id);
@@ -388,12 +395,14 @@ onClick={() =>
 
 <br /><br />
 
+
 <button
   style={reportStyle}
-  onClick={() => window.open("/templates/報告書.docx", "_blank")}
+  onClick={createReport}
 >
   報告書
 </button>
+
 
 <button
   style={reportStyle}
