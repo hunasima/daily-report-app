@@ -143,7 +143,20 @@ sheet.getCell(`L${row}`).value =
 };
 
 const createReport = async () => {
-  alert("報告書作成テスト");
+
+  if (!filteredList.length) {
+    alert("利用者検索をしてください");
+    return;
+  }
+
+  const r = filteredList[0];
+
+  alert(
+    `氏名:${r.name}
+日付:${r.date}
+内容:${r.content}
+備考:${r.note || ""}`
+  );
 };
 
   const edit=r=>{
