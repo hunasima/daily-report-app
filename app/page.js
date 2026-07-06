@@ -151,12 +151,27 @@ const createReport = async () => {
 
   const r = filteredList[0];
 
-  alert(
-    `氏名:${r.name}
-日付:${r.date}
-内容:${r.content}
-備考:${r.note || ""}`
-  );
+ const reportData = {
+  NAME: r.name,
+  DATE: r.date,
+  CONTENT: r.content,
+  NOTE: r.note || ""
+};
+
+const response = await fetch("/templates/報告書.docx");
+const content = await response.arrayBuffer();
+
+alert("テンプレ読込OK");
+const zip = new PizZip(content);
+
+alert("Zip作成OK");
+try {
+  let doc = new Docxtemplater(zip);
+  alert("Doc作成OK");
+} catch (err) {
+  alert(err.message);
+  return;
+}
 };
 
   const edit=r=>{
@@ -411,7 +426,7 @@ onClick={() =>
 
 <button
   style={reportStyle}
-  onClick={createReport}
+  onClick={() => window.open("/templates/報告書.docx", "_blank")}
 >
   報告書
 </button>
