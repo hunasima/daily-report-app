@@ -244,7 +244,11 @@ const reportStyle = {
 
     const a=document.createElement("a");
     a.href=URL.createObjectURL(blob);
-    a.download="report.csv";
+    const fileName = searchDate
+  ? `${searchDate.replace(/-/g, ".")}.csv`
+  : "report.csv";
+
+a.download = fileName;
     a.click();
   };
 
