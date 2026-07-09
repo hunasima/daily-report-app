@@ -31,6 +31,7 @@ const [form, setForm] = useState({
 });
   const [list, setList] = useState([]);
   const [searchDate, setSearchDate] = useState("");
+  const [searchMonth, setSearchMonth] = useState("");
   const [searchName, setSearchName] = useState("");
   const [editId, setEditId] = useState(null);
   const refs = useRef([]);
@@ -188,16 +189,22 @@ const monthTotal = list.reduce(
 );
 
 const monthCount = list.length;
-const filteredList = list.filter((r) => {
-  const dateMatch =
-    !searchDate || r.date === searchDate;
 
-  const nameMatch =
-    !searchName ||
-    (r.name || "").includes(searchName);
+const filteredList = list
+  .filter((r) => {
+    const dateMatch =
+      !searchDate || r.date === searchDate;
 
-  return dateMatch && nameMatch;
-});
+    const monthMatch =
+      !searchMonth || r.date.startsWith(searchMonth);
+
+    const nameMatch =
+      !searchName ||
+      (r.name || "").includes(searchName);
+
+    return dateMatch && monthMatch && nameMatch;
+  })
+  .sort((a, b) => b.date.localeCompare(a.date));
 
 const billStyle = {
   background:"#FF9800",
@@ -230,7 +237,9 @@ const reportStyle = {
       "距離","交通費","売上合計"
     ];
 
-   const rows = filteredList.map(r => [
+   const rows = [...filteredList]
+  .sort((a, b) => a.date.localeCompare(b.date))
+  .map(r => [
       r.date,r.name,r.place,r.staff,
       r.duration,r.start,r.end,
       r.content,`"${(r.note || "").replace(/"/g, '""')}"`,
@@ -244,10 +253,12 @@ const reportStyle = {
 
     const a=document.createElement("a");
     a.href=URL.createObjectURL(blob);
-    const fileName = searchDate
-  ? `${searchDate.replace(/-/g, ".")}.csv`
-  : "report.csv";
-
+ const fileName =
+  searchDate
+    ? `${searchDate.replace(/-/g, ".")}.csv`
+    : searchMonth
+    ? `${searchMonth}.csv`
+    : "report.csv";
 a.download = fileName;
     a.click();
   };
@@ -263,7 +274,12 @@ a.download = fileName;
     value={searchDate}
     onChange={(e) => setSearchDate(e.target.value)}
   />
-
+<input
+  type="month"
+  value={searchMonth}
+  onChange={(e) => setSearchMonth(e.target.value)}
+  style={{ marginLeft: "10px" }}
+/>
   <input
     placeholder="利用者検索"
     value={searchName}
