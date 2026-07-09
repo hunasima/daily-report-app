@@ -32,6 +32,7 @@ const [form, setForm] = useState({
   const [list, setList] = useState([]);
   const [searchDate, setSearchDate] = useState("");
   const [searchMonth, setSearchMonth] = useState("");
+  const [searchYear, setSearchYear] = useState("");
   const [searchName, setSearchName] = useState("");
   const [editId, setEditId] = useState(null);
   const refs = useRef([]);
@@ -198,11 +199,19 @@ const filteredList = list
     const monthMatch =
       !searchMonth || r.date.startsWith(searchMonth);
 
+    const yearMatch =
+      !searchYear || r.date.startsWith(searchYear);
+
     const nameMatch =
       !searchName ||
       (r.name || "").includes(searchName);
 
-    return dateMatch && monthMatch && nameMatch;
+    return (
+      dateMatch &&
+      monthMatch &&
+      yearMatch &&
+      nameMatch
+    );
   })
   .sort((a, b) => b.date.localeCompare(a.date));
 
@@ -253,11 +262,13 @@ const reportStyle = {
 
     const a=document.createElement("a");
     a.href=URL.createObjectURL(blob);
- const fileName =
+const fileName =
   searchDate
     ? `${searchDate.replace(/-/g, ".")}.csv`
     : searchMonth
     ? `${searchMonth}.csv`
+    : searchYear
+    ? `${searchYear}.csv`
     : "report.csv";
 a.download = fileName;
     a.click();
@@ -280,12 +291,20 @@ a.download = fileName;
   onChange={(e) => setSearchMonth(e.target.value)}
   style={{ marginLeft: "10px" }}
 />
+ <input
+  type="text"
+  placeholder="年表示"
+  value={searchYear}
+  onChange={(e) => setSearchYear(e.target.value)}
+  style={{ marginLeft: "10px", width: "80px" }}
+/>
   <input
     placeholder="利用者検索"
     value={searchName}
     onChange={(e) => setSearchName(e.target.value)}
     style={{ marginLeft: "10px" }}
   />
+ 
 </div>
 
 <p>登録件数：{monthCount}件</p>
