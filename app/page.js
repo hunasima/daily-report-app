@@ -494,6 +494,7 @@ onClick={() =>
       <th>時間</th>
       <th>内容</th>
       <th>備考</th>
+       <th>現金使用</th>
       <th>現金使用内容</th>
       <th>売上</th>
       <th>操作</th>
@@ -522,6 +523,8 @@ onClick={() =>
 }}>
   {r.note}
 </td>
+
+<td style={{border:"1px solid #ccc",padding:"6px"}}>{r.use}</td>
 <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.useNote}</td>
 <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.total}</td>
       <td>
