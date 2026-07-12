@@ -39,6 +39,7 @@ const [customer, setCustomer] = useState({
   disease: "",
   note: ""
 });
+const [editingCustomer, setEditingCustomer] = useState(null);
 const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [list, setList] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -137,6 +138,26 @@ const saveCustomer = async () => {
     note: ""
   });
 
+};
+
+const updateCustomer = async () => {
+
+  await updateDoc(
+    doc(db, "customers", editingCustomer.id),
+    {
+      name: editingCustomer.name,
+      birthday: editingCustomer.birthday,
+      emergency: editingCustomer.emergency,
+      doctor: editingCustomer.doctor,
+      careManager: editingCustomer.careManager,
+      disease: editingCustomer.disease,
+      note: editingCustomer.note
+    }
+  );
+
+  alert("更新しました");
+
+  setEditingCustomer(null);
 };
 
 
@@ -529,6 +550,128 @@ a.download = fileName;
 
     <p>注意事項</p>
     <pre>{customerInfo.note}</pre>
+    <button
+  onClick={() =>
+    setEditingCustomer(customerInfo)
+  }
+  style={{
+    background:"#FF9800",
+    color:"white",
+    border:"none",
+    borderRadius:"6px",
+    padding:"8px 12px"
+  }}
+>
+  編集
+</button>
+
+
+{editingCustomer && (
+  <div
+    style={{
+      border:"1px solid #ccc",
+      padding:"10px",
+      marginTop:"10px"
+    }}
+  >
+    <h4>利用者編集</h4>
+
+    <input
+      value={editingCustomer.name || ""}
+      onChange={(e)=>
+        setEditingCustomer({
+          ...editingCustomer,
+          name:e.target.value
+        })
+      }
+    />
+
+    <input
+      value={editingCustomer.birthday || ""}
+      onChange={(e)=>
+        setEditingCustomer({
+          ...editingCustomer,
+          birthday:e.target.value
+        })
+      }
+    />
+    <input
+  value={editingCustomer.emergency || ""}
+  onChange={(e)=>
+    setEditingCustomer({
+      ...editingCustomer,
+      emergency:e.target.value
+    })
+  }
+  placeholder="緊急連絡先"
+/>
+
+<input
+  value={editingCustomer.doctor || ""}
+  onChange={(e)=>
+    setEditingCustomer({
+      ...editingCustomer,
+      doctor:e.target.value
+    })
+  }
+  placeholder="主治医"
+/>
+
+<input
+  value={editingCustomer.careManager || ""}
+  onChange={(e)=>
+    setEditingCustomer({
+      ...editingCustomer,
+      careManager:e.target.value
+    })
+  }
+  placeholder="担当ケアマネ"
+/>
+
+<textarea
+  value={editingCustomer.disease || ""}
+  onChange={(e)=>
+    setEditingCustomer({
+      ...editingCustomer,
+      disease:e.target.value
+    })
+  }
+  placeholder="既往歴"
+  style={{
+    width:"100%",
+    height:"80px"
+  }}
+/>
+
+<textarea
+  value={editingCustomer.note || ""}
+  onChange={(e)=>
+    setEditingCustomer({
+      ...editingCustomer,
+      note:e.target.value
+    })
+  }
+  placeholder="注意事項"
+  style={{
+    width:"100%",
+    height:"80px"
+  }}
+/>
+<button
+  onClick={updateCustomer}
+  style={{
+    background:"#4CAF50",
+    color:"white",
+    border:"none",
+    borderRadius:"6px",
+    padding:"8px 12px",
+    marginTop:"10px"
+  }}
+>
+  更新
+</button>
+  </div>
+)}
     <h4>利用履歴</h4>
 
 <ul>
