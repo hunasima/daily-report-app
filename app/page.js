@@ -311,7 +311,7 @@ a.download = fileName;
   return (
     <div style={{padding:20}}>
     
-      <h2>日報 完成版</h2>
+      <h2>日報 </h2>
 
 <div style={{ marginBottom: "10px" }}>
   <input
@@ -594,6 +594,8 @@ onClick={() =>
 <h3>利用者マスタ</h3>
 
 <input
+  ref={e => refs.current[16] = e}
+  onKeyDown={e => next(e,16)}
   placeholder="利用者名"
   value={customer.name}
   onChange={(e) =>
@@ -605,7 +607,9 @@ onClick={() =>
 />
 
 <input
-  type="date"
+  ref={e => refs.current[17] = e}
+  onKeyDown={e => next(e,17)}
+  placeholder="1984-02-18"
   value={customer.birthday}
   onChange={(e) =>
     setCustomer({
@@ -616,6 +620,8 @@ onClick={() =>
 />
 
 <input
+  ref={e => refs.current[18] = e}
+  onKeyDown={e => next(e,18)}
   placeholder="緊急連絡先"
   value={customer.emergency}
   onChange={(e) =>
@@ -627,6 +633,8 @@ onClick={() =>
 />
 
 <input
+  ref={e => refs.current[19] = e}
+  onKeyDown={e => next(e,19)}
   placeholder="主治医"
   value={customer.doctor}
   onChange={(e) =>
@@ -638,6 +646,8 @@ onClick={() =>
 />
 
 <input
+  ref={e => refs.current[20] = e}
+  onKeyDown={e => next(e,20)}
   placeholder="担当ケアマネ"
   value={customer.careManager}
   onChange={(e) =>
@@ -649,6 +659,8 @@ onClick={() =>
 />
 
 <textarea
+  ref={e => refs.current[21] = e}
+  onKeyDown={e => next(e,21)}
   placeholder="既往歴"
   value={customer.disease}
   onChange={(e) =>
@@ -658,13 +670,14 @@ onClick={() =>
     })
   }
   style={{
-    width: "100%",
-    height: "80px",
-    marginTop: "10px"
+    width:"100%",
+    height:"80px",
+    marginTop:"10px"
   }}
 />
-
 <textarea
+  ref={e => refs.current[22] = e}
+  onKeyDown={e => next(e,22)}
   placeholder="注意事項"
   value={customer.note}
   onChange={(e) =>
@@ -674,13 +687,14 @@ onClick={() =>
     })
   }
   style={{
-    width: "100%",
-    height: "80px",
-    marginTop: "10px"
+    width:"100%",
+    height:"80px",
+    marginTop:"10px"
   }}
-  />
+/>
 
-  <button
+<button
+  ref={e => refs.current[23] = e}
   onClick={saveCustomer}
   style={{
     background:"#4CAF50",
