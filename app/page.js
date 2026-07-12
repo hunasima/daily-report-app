@@ -85,23 +85,47 @@ const [customer, setCustomer] = useState({
     (Number(form.toll)||0)+
         
     transport;
-
-  // 保存
-  const save=async()=>{
   
-    const data={...form,transport,total,duration:duration()};
-    if(editId){
-      await updateDoc(doc(db,"reports",editId),data);
-      setEditId(null);
-    }else{
-      await addDoc(collection(db,"reports"),data);
-    }
-    
-setForm({
-  date: today
-});
+ // 保存
+const save=async()=>{
 
-  };
+  const data={...form,transport,total,duration:duration()};
+
+  if(editId){
+    await updateDoc(doc(db,"reports",editId),data);
+    setEditId(null);
+  }else{
+    await addDoc(collection(db,"reports"),data);
+  }
+
+  setForm({
+    date: today
+  });
+
+};
+
+const saveCustomer = async () => {
+
+  await addDoc(
+    collection(db, "customers"),
+    customer
+  );
+
+  alert("利用者登録しました");
+
+  setCustomer({
+    name: "",
+    birthday: "",
+    emergency: "",
+    doctor: "",
+    careManager: "",
+    disease: "",
+    note: ""
+  });
+
+};
+
+
 const createInvoice = async (fileName) => {
   
 const response =
@@ -565,6 +589,110 @@ onClick={() =>
   ))}
 </tbody>
 </table>
+<hr />
+
+<h3>利用者マスタ</h3>
+
+<input
+  placeholder="利用者名"
+  value={customer.name}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      name: e.target.value
+    })
+  }
+/>
+
+<input
+  type="date"
+  value={customer.birthday}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      birthday: e.target.value
+    })
+  }
+/>
+
+<input
+  placeholder="緊急連絡先"
+  value={customer.emergency}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      emergency: e.target.value
+    })
+  }
+/>
+
+<input
+  placeholder="主治医"
+  value={customer.doctor}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      doctor: e.target.value
+    })
+  }
+/>
+
+<input
+  placeholder="担当ケアマネ"
+  value={customer.careManager}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      careManager: e.target.value
+    })
+  }
+/>
+
+<textarea
+  placeholder="既往歴"
+  value={customer.disease}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      disease: e.target.value
+    })
+  }
+  style={{
+    width: "100%",
+    height: "80px",
+    marginTop: "10px"
+  }}
+/>
+
+<textarea
+  placeholder="注意事項"
+  value={customer.note}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      note: e.target.value
+    })
+  }
+  style={{
+    width: "100%",
+    height: "80px",
+    marginTop: "10px"
+  }}
+  />
+
+  <button
+  onClick={saveCustomer}
+  style={{
+    background:"#4CAF50",
+    color:"white",
+    border:"none",
+    borderRadius:"6px",
+    padding:"8px 12px",
+    marginTop:"10px"
+  }}
+>
+  利用者登録
+</button>
 </div>
 );
 }
