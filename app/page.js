@@ -159,6 +159,20 @@ const updateCustomer = async () => {
 
   setEditingCustomer(null);
 };
+const deleteCustomer = async () => {
+
+  if (!window.confirm("削除しますか？")) {
+    return;
+  }
+
+  await deleteDoc(
+    doc(db, "customers", editingCustomer.id)
+  );
+
+  alert("削除しました");
+
+  setEditingCustomer(null);
+};
 
 
 const createInvoice = async (fileName) => {
@@ -670,6 +684,20 @@ a.download = fileName;
 >
   更新
 </button>
+<button
+  onClick={deleteCustomer}
+  style={{
+    background:"#f44336",
+    color:"white",
+    border:"none",
+    borderRadius:"6px",
+    padding:"8px 12px",
+    marginTop:"10px",
+    marginLeft:"10px"
+  }}
+>
+  削除
+</button>
   </div>
 )}
     <h4>利用履歴</h4>
@@ -683,7 +711,6 @@ a.download = fileName;
 </ul>
   </div>
 )}
-`
 {!searchName && (
     <>
       <input ref={e=>refs.current[0]=e} onKeyDown={e=>next(e,0)} type="date"
