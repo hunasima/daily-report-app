@@ -27,7 +27,17 @@ export default function Home() {
   const today = new Date().toISOString().split("T")[0];
 
 const [form, setForm] = useState({
+  
   date: today
+});
+const [customer, setCustomer] = useState({
+  name: "",
+  birthday: "",
+  emergency: "",
+  doctor: "",
+  careManager: "",
+  disease: "",
+  note: ""
 });
   const [list, setList] = useState([]);
   const [searchDate, setSearchDate] = useState("");
