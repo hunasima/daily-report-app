@@ -1,0 +1,64 @@
+[33m629b89b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m 7/12情報登録追加
+[33m78a016e[m 利用者カルテ編集機能追加
+[33m27c93a2[m 利用者カルテ追加
+[33m189f74c[m 利用者マスタ追加
+[33m652b99c[m 利用者マスタ保存機能追加
+[33m630ba0d[m 利用者マスタ state追加
+[33md7f74dc[m 現金使用表示追加
+[33m36da3cc[m 7/9
+[33mf12acfa[m 7/9
+[33ma3b820e[m 日報最終
+[33me502ffa[m 7/6完成版
+[33m5ef0670[m 報告書データ取得成功
+[33ma3a4413[m 報告書作成準備
+[33m7c104be[m 請求書4種類対応
+[33mdee68d5[m 請求書4種類対応と売上計算修正
+[33m7bf2d8e[m 全請求書自動作成対応
+[33m67336f8[m 請求書エラー修正
+[33m1b9db2c[m 請求書自動作成完成
+[33m3971280[m 請求書作成途中
+[33mffebb14[m exceljs導入
+[33md4022d7[m 帳票ボタン追加
+[33m4731ae5[m 復旧と検索機能完成
+[33mbc2bbf5[m 検索と集計追加
+[33m3bb2b09[m final version
+[33mfe9dfc3[m reset
+[33me2617c2[m fix final
+[33m7bce6b9[m final stable
+[33m384733b[m final stable
+[33m416dd08[m final stable
+[33m728c3f5[m fix crash
+[33m64c3534[m fix crash
+[33m7833b36[m final perfect
+[33mfa25ca0[m fix all
+[33m9968fd4[m csv + layout
+[33m1c5ba66[m fix buttons + layout
+[33md8555cb[m fix save + csv
+[33m2e42086[m restore all fields
+[33mf8b3ed7[m final fix
+[33m17203ef[m final excel system
+[33maf68437[m fix input bug
+[33m777259e[m excel style app
+[33m49197dc[m final full app
+[33m8b53638[m full business fields
+[33m9457d42[m final full app
+[33mc8c547f[m add delete and edit
+[33m91de02c[m add delete function
+[33m8e41bb1[m business report
+[33m45d3687[m reset working code
+[33m96bc918[m final fix
+[33mb985350[m force deploy
+[33m5ede8d7[m full report restored
+[33m826ac8d[m realtime fix
+[33mdeb3d4c[m final firebase working
+[33m4769d04[m fix button
+[33me9282d8[m install firebase
+[33m7de25fd[m firebase full fix
+[33m67b7f1c[m firebase update
+[33m758a6ef[m firebase
+[33mf9a6ab2[m full report app
+[33ma0e7ab4[m fix UI
+[33md71cf11[m final fix
+[33m099bacd[m remove tsx completely
+[33me8d0faf[m fix
+[33me84c909[m first commit

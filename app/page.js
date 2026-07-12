@@ -173,6 +173,41 @@ const deleteCustomer = async () => {
 
   setEditingCustomer(null);
 };
+const downloadCustomers = () => {
+
+  const header = [
+    "利用者名",
+    "生年月日",
+    "緊急連絡先",
+    "主治医",
+    "担当ケアマネ",
+    "既往歴",
+    "注意事項"
+  ];
+
+  const rows = customers.map(c => [
+    c.name || "",
+    c.birthday || "",
+    c.emergency || "",
+    c.doctor || "",
+    c.careManager || "",
+    c.disease || "",
+    c.note || ""
+  ]);
+
+  const csv = [header, ...rows]
+    .map(r => r.join(","))
+    .join("\n");
+
+  const blob = new Blob(
+    ["\ufeff" + csv],
+    {
+      type: "text/csv;charset=utf-8;"
+    }
+  );
+
+  saveAs(blob, "customers.csv");
+};
 
 
 const createInvoice = async (fileName) => {
@@ -413,6 +448,20 @@ a.download = fileName;
 >
   利用者情報登録
 </button>
+<button
+  onClick={downloadCustomers}
+  style={{
+    background:"#673AB7",
+    color:"white",
+    border:"none",
+    borderRadius:"6px",
+    padding:"8px 12px",
+    marginLeft:"10px"
+  }}
+>
+  利用者一覧CSV
+</button>
+
 {showCustomerForm && (
   <>
   
