@@ -39,7 +39,9 @@ const [customer, setCustomer] = useState({
   disease: "",
   note: ""
 });
+const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [list, setList] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [searchDate, setSearchDate] = useState("");
   const [searchMonth, setSearchMonth] = useState("");
   const [searchYear, setSearchYear] = useState("");
@@ -65,6 +67,18 @@ const [customer, setCustomer] = useState({
     });
     return ()=>unsub();
   },[]);
+  useEffect(()=>{
+  const unsub = onSnapshot(collection(db,"customers"),snap=>{
+    setCustomers(
+      snap.docs.map(d=>({
+        id:d.id,
+        ...d.data()
+      }))
+    );
+  });
+
+  return ()=>unsub();
+},[]);
 
   // 利用時間
   const duration = ()=>{
@@ -248,6 +262,15 @@ const filteredList = list
     );
   })
   .sort((a, b) => b.date.localeCompare(a.date));
+const customerInfo =
+  searchName
+    ? customers.find(
+        c => (c.name || "").includes(searchName)
+      )
+    : null;
+const customerReports = list.filter(
+  r => r.name === searchName
+);
 
 const billStyle = {
   background:"#FF9800",
@@ -338,12 +361,188 @@ a.download = fileName;
     onChange={(e) => setSearchName(e.target.value)}
     style={{ marginLeft: "10px" }}
   />
- 
+ {!searchName && (
+  <>
+  <button
+  onClick={() =>
+    setShowCustomerForm(!showCustomerForm)
+  }
+  style={{
+    background:"#1976D2",
+    color:"white",
+    border:"none",
+    borderRadius:"6px",
+    padding:"8px 12px",
+    marginTop:"10px"
+  }}
+>
+  利用者情報登録
+</button>
+{showCustomerForm && (
+  <>
+  
+    <h3>利用者情報</h3>
+
+    <input
+      ref={e => refs.current[16] = e}
+      onKeyDown={e => next(e,16)}
+      placeholder="利用者名"
+      value={customer.name}
+      onChange={(e) =>
+        setCustomer({
+          ...customer,
+          name: e.target.value
+        })
+      }
+    />
+
+    {/* 生年月日 */}
+
+    <input
+      ref={e => refs.current[17] = e}
+      onKeyDown={e => next(e,17)}
+      placeholder="1984-02-18"
+      value={customer.birthday}
+      onChange={(e) =>
+        setCustomer({
+          ...customer,
+          birthday: e.target.value
+        })
+      }
+    />
+
+   <input
+  ref={e => refs.current[18] = e}
+  onKeyDown={e => next(e,18)}
+  placeholder="緊急連絡先"
+  value={customer.emergency}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      emergency: e.target.value
+    })
+  }
+/>
+
+<input
+  ref={e => refs.current[19] = e}
+  onKeyDown={e => next(e,19)}
+  placeholder="主治医"
+  value={customer.doctor}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      doctor: e.target.value
+    })
+  }
+/>
+
+<input
+  ref={e => refs.current[20] = e}
+  onKeyDown={e => next(e,20)}
+  placeholder="担当ケアマネ"
+  value={customer.careManager}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      careManager: e.target.value
+    })
+  }
+/>
+
+<textarea
+  ref={e => refs.current[21] = e}
+  onKeyDown={e => next(e,21)}
+  placeholder="既往歴"
+  value={customer.disease}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      disease: e.target.value
+    })
+  }
+  style={{
+    width:"100%",
+    height:"80px",
+    marginTop:"10px"
+  }}
+/>
+
+<textarea
+  ref={e => refs.current[22] = e}
+  onKeyDown={e => next(e,22)}
+  placeholder="注意事項"
+  value={customer.note}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      note: e.target.value
+    })
+  }
+  style={{
+    width:"100%",
+    height:"80px",
+    marginTop:"10px"
+  }}
+/>
+
+    <button
+      ref={e => refs.current[23] = e}
+      onClick={saveCustomer}
+      style={{
+        background:"#4CAF50",
+        color:"white",
+        border:"none",
+        borderRadius:"6px",
+        padding:"8px 12px",
+        marginTop:"10px"
+      }}
+    >
+      利用者登録
+    </button>
+    </>
+)}
+  </>
+)}
 </div>
 
 <p>登録件数：{monthCount}件</p>
 <p>売上合計：{monthTotal.toLocaleString()}円</p>
+{customerInfo && (
+  <div
+    style={{
+      border:"1px solid #ccc",
+      padding:"10px",
+      marginTop:"10px"
+    }}
+  >
+    <h3>利用者カルテ</h3>
+
+    <p>利用者名：{customerInfo.name}</p>
+    <p>生年月日：{customerInfo.birthday}</p>
+    <p>緊急連絡先：{customerInfo.emergency}</p>
+    <p>主治医：{customerInfo.doctor}</p>
+    <p>担当ケアマネ：{customerInfo.careManager}</p>
+
+    <p>既往歴</p>
+    <pre>{customerInfo.disease}</pre>
+
+    <p>注意事項</p>
+    <pre>{customerInfo.note}</pre>
+    <h4>利用履歴</h4>
+
+<ul>
+  {customerReports.map((r) => (
+    <li key={r.id}>
+      {r.date}　{r.content}
+    </li>
+  ))}
+</ul>
+  </div>
+)}
 `
+{!searchName && (
+    <>
       <input ref={e=>refs.current[0]=e} onKeyDown={e=>next(e,0)} type="date"
         value={form.date||""} onChange={e=>change("date",e.target.value)} />
 
@@ -511,6 +710,8 @@ onClick={() =>
 >
   FAX送付表
 </button>
+</>
+)}
       <hr/>
 <table style={{
   width:"100%",
@@ -591,122 +792,8 @@ onClick={() =>
 </table>
 <hr />
 
-<h3>利用者マスタ</h3>
 
-<input
-  ref={e => refs.current[16] = e}
-  onKeyDown={e => next(e,16)}
-  placeholder="利用者名"
-  value={customer.name}
-  onChange={(e) =>
-    setCustomer({
-      ...customer,
-      name: e.target.value
-    })
-  }
-/>
 
-<input
-  ref={e => refs.current[17] = e}
-  onKeyDown={e => next(e,17)}
-  placeholder="1984-02-18"
-  value={customer.birthday}
-  onChange={(e) =>
-    setCustomer({
-      ...customer,
-      birthday: e.target.value
-    })
-  }
-/>
-
-<input
-  ref={e => refs.current[18] = e}
-  onKeyDown={e => next(e,18)}
-  placeholder="緊急連絡先"
-  value={customer.emergency}
-  onChange={(e) =>
-    setCustomer({
-      ...customer,
-      emergency: e.target.value
-    })
-  }
-/>
-
-<input
-  ref={e => refs.current[19] = e}
-  onKeyDown={e => next(e,19)}
-  placeholder="主治医"
-  value={customer.doctor}
-  onChange={(e) =>
-    setCustomer({
-      ...customer,
-      doctor: e.target.value
-    })
-  }
-/>
-
-<input
-  ref={e => refs.current[20] = e}
-  onKeyDown={e => next(e,20)}
-  placeholder="担当ケアマネ"
-  value={customer.careManager}
-  onChange={(e) =>
-    setCustomer({
-      ...customer,
-      careManager: e.target.value
-    })
-  }
-/>
-
-<textarea
-  ref={e => refs.current[21] = e}
-  onKeyDown={e => next(e,21)}
-  placeholder="既往歴"
-  value={customer.disease}
-  onChange={(e) =>
-    setCustomer({
-      ...customer,
-      disease: e.target.value
-    })
-  }
-  style={{
-    width:"100%",
-    height:"80px",
-    marginTop:"10px"
-  }}
-/>
-<textarea
-  ref={e => refs.current[22] = e}
-  onKeyDown={e => next(e,22)}
-  placeholder="注意事項"
-  value={customer.note}
-  onChange={(e) =>
-    setCustomer({
-      ...customer,
-      note: e.target.value
-    })
-  }
-  style={{
-    width:"100%",
-    height:"80px",
-    marginTop:"10px"
-  }}
-/>
-
-<button
-  ref={e => refs.current[23] = e}
-  onClick={saveCustomer}
-  style={{
-    background:"#4CAF50",
-    color:"white",
-    border:"none",
-    borderRadius:"6px",
-    padding:"8px 12px",
-    marginTop:"10px"
-  }}
->
-  利用者登録
-</button>
 </div>
 );
 }
