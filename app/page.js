@@ -173,6 +173,58 @@ const deleteCustomer = async () => {
 
   setEditingCustomer(null);
 };
+const downloadCustomerCard = () => {
+
+  if (!customerInfo) {
+    alert("利用者を検索してください");
+    return;
+  }
+
+  const rows = [
+    ["利用者名", customerInfo.name || ""],
+    ["生年月日", customerInfo.birthday || ""],
+    ["緊急連絡先", customerInfo.emergency || ""],
+    ["主治医", customerInfo.doctor || ""],
+    ["担当ケアマネ", customerInfo.careManager || ""],
+    
+[  "既往歴",  `"${(customerInfo.disease || "").replace(/"/g, '""')}"`],
+
+  
+[  "注意事項",  `"${(customerInfo.note || "").replace(/"/g, '""')}"`],
+
+    [],
+    ["利用履歴"],
+   ["日付", "内容", "担当", "利用時間", "迎先", "備考", "現金使用", "現金使用内容", "売上"]
+  ];
+
+ customerReports.forEach(r => {
+  rows.push([
+    r.date || "",
+    r.content || "",
+    r.staff || "",
+    r.duration || "",
+    r.place || "",
+    `"${(r.note || "").replace(/"/g, '""')}"`,
+    r.use || "",
+    `"${(r.useNote || "").replace(/"/g, '""')}"`,
+    r.total || ""
+  ]);
+});
+  const csv = rows
+    .map(r => r.join(","))
+    .join("\n");
+
+  const blob = new Blob(
+    ["\ufeff" + csv],
+    { type: "text/csv;charset=utf-8;" }
+  );
+
+  saveAs(
+    blob,
+    `${customerInfo.name}_カルテ.csv`
+  );
+};
+
 const downloadCustomers = () => {
 
   const header = [
@@ -339,7 +391,7 @@ const customerInfo =
       )
     : null;
 const customerReports = list.filter(
-  r => r.name === searchName
+  r => (r.name || "").includes(searchName)
 );
 
 const billStyle = {
@@ -425,12 +477,22 @@ a.download = fileName;
   onChange={(e) => setSearchYear(e.target.value)}
   style={{ marginLeft: "10px", width: "80px" }}
 />
-  <input
-    placeholder="利用者検索"
-    value={searchName}
-    onChange={(e) => setSearchName(e.target.value)}
-    style={{ marginLeft: "10px" }}
-  />
+ <input
+  list="customer-list"
+  placeholder="利用者検索"
+  value={searchName}
+  onChange={(e) => setSearchName(e.target.value)}
+/>
+
+
+<datalist id="customer-list">
+  {customers.map(c => (
+    <option
+      key={c.id}
+      value={c.name}
+    />
+  ))}
+</datalist>
  {!searchName && (
   <>
   <button
@@ -609,10 +671,26 @@ a.download = fileName;
     <p>担当ケアマネ：{customerInfo.careManager}</p>
 
     <p>既往歴</p>
-    <pre>{customerInfo.disease}</pre>
+   <pre
+  style={{
+    whiteSpace: "pre-wrap",
+    wordBreak: "break-word",
+    overflowWrap: "break-word"
+  }}
+>
+  {customerInfo.disease}
+</pre>
 
     <p>注意事項</p>
-    <pre>{customerInfo.note}</pre>
+   <pre
+  style={{
+    whiteSpace: "pre-wrap",
+    wordBreak: "break-word",
+    overflowWrap: "break-word"
+  }}
+>
+  {customerInfo.note}
+</pre>
     <button
   onClick={() =>
     setEditingCustomer(customerInfo)
@@ -626,6 +704,19 @@ a.download = fileName;
   }}
 >
   編集
+</button>
+<button
+  onClick={downloadCustomerCard}
+  style={{
+    background:"#2196F3",
+    color:"white",
+    border:"none",
+    borderRadius:"6px",
+    padding:"8px 12px",
+    marginLeft:"10px"
+  }}
+>
+  カルテCSV
 </button>
 
 
@@ -765,9 +856,23 @@ a.download = fileName;
       <input ref={e=>refs.current[0]=e} onKeyDown={e=>next(e,0)} type="date"
         value={form.date||""} onChange={e=>change("date",e.target.value)} />
 
-      <input ref={e=>refs.current[1]=e} onKeyDown={e=>next(e,1)}
-        placeholder="利用者" value={form.name||""}
-        onChange={e=>change("name",e.target.value)} />
+      <input
+  list="customer-list"
+  ref={e=>refs.current[1]=e}
+  onKeyDown={e=>next(e,1)}
+  placeholder="利用者"
+  value={form.name||""}
+  onChange={e=>change("name",e.target.value)}
+/>
+
+<datalist id="customer-list">
+  {customers.map(c => (
+    <option
+      key={c.id}
+      value={c.name}
+    />
+  ))}
+</datalist>
 
       <input ref={e=>refs.current[2]=e} onKeyDown={e=>next(e,2)}
         placeholder="迎先" value={form.place||""}
