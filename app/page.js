@@ -598,7 +598,6 @@ a.download = fileName;
 
 <textarea
   ref={e => refs.current[21] = e}
-  onKeyDown={e => next(e,21)}
   placeholder="既往歴"
   value={customer.disease}
   onChange={(e) =>
@@ -616,7 +615,6 @@ a.download = fileName;
 
 <textarea
   ref={e => refs.current[22] = e}
-  onKeyDown={e => next(e,22)}
   placeholder="注意事項"
   value={customer.note}
   onChange={(e) =>
@@ -1055,6 +1053,7 @@ onClick={() =>
       <th>備考</th>
        <th>現金使用</th>
       <th>現金使用内容</th>
+      <th>立替金</th>
       <th>売上</th>
       <th>操作</th>
     </tr>
@@ -1085,6 +1084,7 @@ onClick={() =>
 
 <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.use}</td>
 <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.useNote}</td>
+<td style={{border:"1px solid #ccc",padding:"6px"}}>{r.advance}</td>
 <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.total}</td>
       <td>
         <button
