@@ -27,8 +27,9 @@ export default function Home() {
   const today = new Date().toISOString().split("T")[0];
 
 const [form, setForm] = useState({
-  
-  date: today
+  date: today,
+  invoiceDone: false,
+  accountingDone: false
 });
 const [customer, setCustomer] = useState({
   name: "",
@@ -354,6 +355,23 @@ try {
   const remove=async id=>{
     await deleteDoc(doc(db,"reports",id));
   };
+  const toggleInvoice = async (r) => {
+  await updateDoc(
+    doc(db,"reports",r.id),
+    {
+      invoiceDone: !r.invoiceDone
+    }
+  );
+};
+
+const toggleAccounting = async (r) => {
+  await updateDoc(
+    doc(db,"reports",r.id),
+    {
+      accountingDone: !r.accountingDone
+    }
+  );
+};
 const monthTotal = list.reduce(
   (sum, r) => sum + (Number(r.total) || 0),
   0
@@ -876,9 +894,20 @@ a.download = fileName;
         placeholder="迎先" value={form.place||""}
         onChange={e=>change("place",e.target.value)} />
 
-      <input ref={e=>refs.current[3]=e} onKeyDown={e=>next(e,3)}
-        placeholder="担当" value={form.staff||""}
-        onChange={e=>change("staff",e.target.value)} />
+      <input
+  list="staff-list"
+  ref={e=>refs.current[3]=e}
+  onKeyDown={e=>next(e,3)}
+  placeholder="担当"
+  value={form.staff||""}
+  onChange={e=>change("staff",e.target.value)}
+/>
+
+<datalist id="staff-list">
+  <option value="丹田T" />
+  <option value="丹田S" />
+  <option value="丹田H" />
+  </datalist>
 
       <input ref={e=>refs.current[4]=e} onKeyDown={e=>next(e,4)} type="time"
         value={form.start||""} onChange={e=>change("start",e.target.value)} />
@@ -940,6 +969,8 @@ a.download = fileName;
 
       <p>利用時間：{duration()}</p>
       <p>交通費：{transport}</p>
+      <p>実売上：{(Number(total) - Number(form.toll || 0)).toLocaleString()}
+</p>
       <p>売上合計：{total}</p>
 
     <button
@@ -1043,6 +1074,7 @@ onClick={() =>
 }}>
   <thead style={{background:"#2f6b6f",color:"white"}}>
     <tr>
+      <th>処理</th>
       <th>日付</th>
       <th>利用者</th>
       <th>迎先</th>
@@ -1066,7 +1098,31 @@ onClick={() =>
   key={r.id}
   style={{ background: r.id % 2 === 0 ? "#f9f9f9" : "white" }}
 >
+<td
+  style={{
+    border:"1px solid #ccc",
+    padding:"6px",
+    whiteSpace:"nowrap"
+  }}
+>
+<div>
+  請求
+  <input
+    type="checkbox"
+    checked={r.invoiceDone || false}
+    onChange={() => toggleInvoice(r)}
+  />
+</div>
 
+<div>
+  会計
+  <input
+    type="checkbox"
+    checked={r.accountingDone || false}
+    onChange={() => toggleAccounting(r)}
+  />
+</div>
+</td>
      <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.date}</td>
 <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.name}</td>
 <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.place}</td>
