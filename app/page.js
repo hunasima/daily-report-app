@@ -264,9 +264,19 @@ const downloadCustomers = () => {
 
 
 const createInvoice = async (fileName) => {
-  
-const response =
-  await fetch(`/templates/${fileName}`);
+  if (!form.date) {
+    alert("日付を入力してください");
+    return;
+  }
+
+  if (!form.name) {
+    alert("利用者名を入力してください");
+    return;
+  }
+
+  const response = await fetch(
+    `/templates/${fileName}?t=${Date.now()}`
+  );
 
   const arrayBuffer = await response.arrayBuffer();
 
@@ -275,46 +285,57 @@ const response =
 
   const sheet = workbook.getWorksheet(1);
 
-  
-sheet.getCell("I5").value =
-  filteredList[0]?.name || searchName;
-filteredList.forEach((r, index) => {
-  
-  const row = 15 + index;
+  // 利用者名
+  sheet.getCell("I5").value = form.name;
 
- 
-if (!r.date) return;
+  // 請求金額
+  sheet.getCell("A11").value = total;
+  sheet.getCell("A11").numFmt = "#,##0";
 
-const d = r.date.split("-");
+  // 年月
+  const d = form.date.split("-");
+  const year = Number(d[0]);
+  const month = Number(d[1]);
+  const day = Number(d[2]);
+  const reiwaYear = year - 2018;
 
+  sheet.getCell("G13").value = reiwaYear;
+  sheet.getCell("I13").value = month;
 
+  // 発行日
+  sheet.getCell("N11").value = new Date();
+  sheet.getCell("N11").numFmt = "yyyy/m/d";
 
-sheet.getCell(`A${row}`).value =
-  `${Number(d[1])}/${Number(d[2])}`;
-sheet.getCell(`B${row}`).value = String(r.start || "");
-sheet.getCell(`C${row}`).value = String(r.end || "");
+  // 明細1行目だけ入れる
+  const row = 15;
 
-  sheet.getCell(`D${row}`).value = r.content;
- const timeText =
-  r.duration
-    ?.replace("時間", ":")
-    .replace("分", "") || "";
+  sheet.getCell(`A${row}`).value = `${month}/${day}`;
+  sheet.getCell(`B${row}`).value = form.start || "";
+  sheet.getCell(`C${row}`).value = form.end || "";
+  sheet.getCell(`D${row}`).value = form.content || "";
 
-sheet.getCell(`L${row}`).value =
-  timeText.replace(/:(\d)$/, ":0$1");
+  const timeText =
+    duration()
+      ?.replace("時間", ":")
+      .replace("分", "") || "";
+
+  sheet.getCell(`L${row}`).value =
+    timeText.replace(/:(\d)$/, ":0$1");
+
   sheet.getCell(`M${row}`).value =
-  r.distance ? `${r.distance}km` : "";
-  sheet.getCell(`O${row}`).value = Number(r.total || 0);
-});
+    form.distance ? `${form.distance}km` : "";
+
+  sheet.getCell(`O${row}`).value = total;
+  sheet.getCell(`O${row}`).numFmt = "#,##0";
 
   const buffer = await workbook.xlsx.writeBuffer();
 
   saveAs(
     new Blob([buffer]),
-    `${searchName}_請求書.xlsx`
+    `${form.name}_${form.date}_請求書.xlsx`
   );
 };
-
+``
 const createReport = async () => {
 
   if (!filteredList.length) {
@@ -376,7 +397,14 @@ const monthTotal = list.reduce(
   (sum, r) => sum + (Number(r.total) || 0),
   0
 );
-
+const advanceTotal = list.reduce(
+  (sum, r) => sum + (Number(r.advance) || 0),
+  0
+);
+const useTotal = list.reduce(
+  (sum, r) => sum + (Number(r.use) || 0),
+  0
+);
 const monthCount = list.length;
 
 const filteredList = list
@@ -670,6 +698,8 @@ a.download = fileName;
 
 <p>登録件数：{monthCount}件</p>
 <p>売上合計：{monthTotal.toLocaleString()}円</p>
+<p>現金使用合計：{useTotal.toLocaleString()}円</p>
+<p>立替金合計：{advanceTotal.toLocaleString()}円</p>
 {customerInfo && (
   <div
     style={{
