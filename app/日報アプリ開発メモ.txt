@@ -1,0 +1,39 @@
+# 日報アプリ開発メモ
+
+
+
+## ローカル起動
+
+cd daily-report-app
+npm run dev
+
+## Git確認
+
+git status
+
+## Git反映
+
+git add .
+git commit -m "修正内容"
+git push
+
+## 請求書
+
+テンプレート
+public/templates
+
+処理
+createInvoice()
+
+## 復旧
+
+page.jsを戻す
+
+git restore app/page.js
+
+## 2026-07-29
+
+・請求書テンプレート修正
+・現金使用合計追加
+・立替金合計追加
+・入力中データで請求書出力

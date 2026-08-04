@@ -393,19 +393,7 @@ const toggleAccounting = async (r) => {
     }
   );
 };
-const monthTotal = list.reduce(
-  (sum, r) => sum + (Number(r.total) || 0),
-  0
-);
-const advanceTotal = list.reduce(
-  (sum, r) => sum + (Number(r.advance) || 0),
-  0
-);
-const useTotal = list.reduce(
-  (sum, r) => sum + (Number(r.use) || 0),
-  0
-);
-const monthCount = list.length;
+
 
 const filteredList = list
   .filter((r) => {
@@ -430,6 +418,35 @@ const filteredList = list
     );
   })
   .sort((a, b) => b.date.localeCompare(a.date));
+  const currentMonth = new Date()
+  .toISOString()
+  .slice(0, 7);
+
+const monthReports = list.filter(
+  r => (r.date || "").startsWith(currentMonth)
+);
+
+const summaryList =
+  searchDate || searchMonth || searchYear || searchName
+    ? filteredList
+    : monthReports;
+
+const monthTotal = summaryList.reduce(
+  (sum, r) => sum + (Number(r.total) || 0),
+  0
+);
+
+const advanceTotal = summaryList.reduce(
+  (sum, r) => sum + (Number(r.advance) || 0),
+  0
+);
+
+const useTotal = summaryList.reduce(
+  (sum, r) => sum + (Number(r.use) || 0),
+  0
+);
+
+const monthCount = summaryList.length;
 const customerInfo =
   searchName
     ? customers.find(
@@ -1095,13 +1112,21 @@ onClick={() =>
 </button>
 </>
 )}
-      <hr/>
-<table style={{
-  width:"100%",
-  borderCollapse:"collapse",
-  marginTop:"20px",
-  fontSize:"14px"
-}}>
+<hr/>
+
+<div
+  style={{
+    overflowX:"auto"
+  }}
+>
+<table
+  style={{
+    borderCollapse:"collapse",
+    marginTop:"20px",
+    fontSize:"14px",
+    minWidth:"800px"
+  }}
+>
   <thead style={{background:"#2f6b6f",color:"white"}}>
     <tr>
       <th>処理</th>
@@ -1159,12 +1184,24 @@ onClick={() =>
 <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.staff}</td>
 <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.duration}</td>
 <td style={{border:"1px solid #ccc",padding:"6px"}}>{r.start}～{r.end}</td>
-<td style={{border:"1px solid #ccc",padding:"6px"}}>{r.content}</td>
-<td style={{
-  border:"1px solid #ccc",
-  padding:"6px",
-  whiteSpace:"pre-wrap"
-}}>
+<td
+  style={{
+    border:"1px solid #ccc",
+    padding:"6px",
+    minWidth:"250px",
+    whiteSpace:"pre-wrap"
+  }}
+>
+  {r.content}
+</td>
+<td
+  style={{
+    border:"1px solid #ccc",
+    padding:"6px",
+    minWidth:"500px",
+    whiteSpace:"pre-wrap"
+  }}
+>
   {r.note}
 </td>
 
@@ -1200,11 +1237,10 @@ onClick={() =>
   ))}
 </tbody>
 </table>
+</div>
+
 <hr />
-
-
 
 </div>
 );
 }
-
