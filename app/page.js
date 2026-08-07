@@ -38,7 +38,9 @@ const [customer, setCustomer] = useState({
   doctor: "",
   careManager: "",
   disease: "",
-  note: ""
+  note: "",
+  pdfName: "",
+  pdfUrl: "",
 });
 const [editingCustomer, setEditingCustomer] = useState(null);
 const [showCustomerForm, setShowCustomerForm] = useState(false);
@@ -694,6 +696,31 @@ a.download = fileName;
     height:"80px",
     marginTop:"10px"
   }}
+/><br /><br />
+
+<input
+  placeholder="PDF名"
+  value={customer.pdfName || ""}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      pdfName: e.target.value
+    })
+  }
+/>
+
+<br /><br />
+
+<input
+  placeholder="OneDrive共有URL"
+  value={customer.pdfUrl || ""}
+  onChange={(e) =>
+    setCustomer({
+      ...customer,
+      pdfUrl: e.target.value
+    })
+  }
+  style={{ width:"100%" }}
 />
 
     <button
@@ -914,7 +941,33 @@ a.download = fileName;
     width:"100%",
     height:"80px"
   }}
+  />
+ <br /><br />
+
+<input
+  value={editingCustomer.pdfName || ""}
+  onChange={(e)=>
+    setEditingCustomer({
+      ...editingCustomer,
+      pdfName:e.target.value
+    })
+  }
+  placeholder="PDF名"
 />
+
+<br /><br />
+
+<input
+  value={editingCustomer.pdfUrl || ""}
+  onChange={(e)=>
+    setEditingCustomer({
+      ...editingCustomer,
+      pdfUrl:e.target.value
+    })
+  }
+  placeholder="OneDrive共有URL"
+  style={{ width:"100%" }}
+/> 
 <button
   onClick={updateCustomer}
   style={{
