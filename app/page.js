@@ -134,15 +134,17 @@ const saveCustomer = async () => {
 
   alert("利用者登録しました");
 
-  setCustomer({
-    name: "",
-    birthday: "",
-    emergency: "",
-    doctor: "",
-    careManager: "",
-    disease: "",
-    note: ""
-  });
+ setCustomer({
+  name: "",
+  birthday: "",
+  emergency: "",
+  doctor: "",
+  careManager: "",
+  disease: "",
+  note: "",
+  pdfName: "",
+  pdfUrl: ""
+});
 
 };
 
@@ -157,7 +159,9 @@ const updateCustomer = async () => {
       doctor: editingCustomer.doctor,
       careManager: editingCustomer.careManager,
       disease: editingCustomer.disease,
-      note: editingCustomer.note
+      note: editingCustomer.note,
+      pdfName: editingCustomer.pdfName,
+pdfUrl: editingCustomer.pdfUrl,
     }
   );
 
