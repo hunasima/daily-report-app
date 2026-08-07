@@ -50,6 +50,9 @@ const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [searchName, setSearchName] = useState("");
   const [editId, setEditId] = useState(null);
   const refs = useRef([]);
+  const fileRef = useRef(null);
+  const [pdfName, setPdfName] = useState("");
+  const [pdfList, setPdfList] = useState([]);
 
   // Enter移動
   const next = (e,i)=>{
@@ -781,6 +784,44 @@ a.download = fileName;
 >
   カルテCSV
 </button>
+<button
+  onClick={() => fileRef.current?.click()}
+  style={{
+    background:"#4CAF50",
+    color:"white",
+    border:"none",
+    borderRadius:"6px",
+    padding:"8px 12px",
+    marginLeft:"10px"
+  }}
+>
+  PDFアップロード
+</button>
+<div style={{ marginTop:"10px" }}>
+  <strong>添付ファイル</strong>
+
+  {pdfList.length === 0 ? (
+    <div>まだ登録されていません</div>
+  ) : (
+    pdfList.map((pdf, i) => (
+      <div key={i}>📄 {pdf}</div>
+    ))
+  )}
+</div>
+<input
+  type="file"
+  accept="application/pdf"
+  ref={fileRef}
+  style={{display:"none"}}
+ onChange={(e)=>{
+  const file = e.target.files?.[0];
+
+ if(file){
+  setPdfList(prev => [...prev, file.name]);
+}
+}}
+/>
+
 
 
 {editingCustomer && (
